@@ -249,6 +249,227 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/03/MongoDB-Ops-Manager-Overview/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Feng">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Feng">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/01/03/MongoDB-Ops-Manager-Overview/" itemprop="url">MongoDB - Ops Manager Overview</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-03T14:29:47+08:00">
+                2018-01-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/MongoDB/" itemprop="url" rel="index">
+                    <span itemprop="name">MongoDB</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/01/03/MongoDB-Ops-Manager-Overview/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/01/03/MongoDB-Ops-Manager-Overview/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="Ops-Manager概念"><a href="#Ops-Manager概念" class="headerlink" title="Ops Manager概念"></a>Ops Manager概念</h2><h3 id="Monitoring"><a href="#Monitoring" class="headerlink" title="Monitoring"></a>Monitoring</h3><ol>
+<li>提供实时的报表、可视化、告警（数据库和系统性能）</li>
+<li>轻量级的agent，不需要每台数据库服务器都安装</li>
+</ol>
+<h3 id="Automation"><a href="#Automation" class="headerlink" title="Automation"></a>Automation</h3><ol>
+<li>用户配置MongoDB node或者cluster</li>
+<li>automation agent每个数据库server上都要安装</li>
+<li>automation agent管理monitor和backup agent</li>
+</ol>
+<h3 id="Backup"><a href="#Backup" class="headerlink" title="Backup"></a>Backup</h3><ol>
+<li>提供基于任务计划的快照和任意时间点的恢复</li>
+<li>必须是集群的环境才可以备份，standalone实例需要先转换为replica set</li>
+</ol>
+<h4 id="Data-Backup"><a href="#Data-Backup" class="headerlink" title="Data Backup"></a>Data Backup</h4><ol>
+<li>backup agent会在复制集内创建一个新的invisble成员，做initial sync</li>
+<li>backup agent使用tail的方式复制oplog到一个head database（每个replica set对应一个head database）</li>
+<li>initial sync和tail oplog使用标准的MongoDB查询，生产库影响不大</li>
+<li>备份使用的mongod版本要大于等于备份客户端</li>
+</ol>
+<p><em>分片环境内，通过mongos停止balancer，插入marker token，然后才会开始执行快照</em></p>
+<table>
+<thead>
+<tr>
+<th>Snapshot Store</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MongoDB blockstore</td>
+<td>Each successive snapshot stores only the differences from the previous snapshot. Compression and block-level de-duplication reduce the size of snapshot data.</td>
+</tr>
+<tr>
+<td>AWS S3 bucket</td>
+<td>Each successive snapshot stores only the differences from the previous snapshot. Compression and block-level de-duplication reduce the size of snapshot data.</td>
+</tr>
+<tr>
+<td>File system store</td>
+<td>Depending on the configuration, compression reduces the size of the snapshot data.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="Data-Restoration"><a href="#Data-Restoration" class="headerlink" title="Data Restoration"></a>Data Restoration</h4><ul>
+<li>分片环境，可以恢复到2个snapshot之间的checkpoint点</li>
+<li>复制集，可以恢复到任意时间点</li>
+</ul>
+<h3 id="Server-Pool"><a href="#Server-Pool" class="headerlink" title="Server Pool"></a>Server Pool</h3><p>如果已经在服务器上部署了automation agent，可以通过osp上的管理员权限用户自动部署MongoDB数据库</p>
+<h2 id="Ops-Manager架构"><a href="#Ops-Manager架构" class="headerlink" title="Ops Manager架构"></a>Ops Manager架构</h2><ol>
+<li>host running ops manager</li>
+<li>host store application data （application database）</li>
+<li>host store snapshots</li>
+</ol>
+<h3 id="Ops-Manager-Application"><a href="#Ops-Manager-Application" class="headerlink" title="Ops Manager Application"></a>Ops Manager Application</h3><p>默认端口8080，可以多个application使用同一个配置和database</p>
+<h3 id="Backup-Daemon-Service"><a href="#Backup-Daemon-Service" class="headerlink" title="Backup Daemon Service"></a>Backup Daemon Service</h3><ol>
+<li>backup Daemon服务管理备份的快照和local copy</li>
+<li>local copy称为head database</li>
+<li>backup Daemon将head database存放在head directory目录下，将snapshot存放在snapshot store下</li>
+<li>backup Daemon所在的主机会创建一个invisible的成员</li>
+<li>多个Backup Daemon可以水平扩展存储并且提供手工failover</li>
+</ol>
+<h3 id="Dedicated-Storage-for-Operational-Data"><a href="#Dedicated-Storage-for-Operational-Data" class="headerlink" title="Dedicated Storage for Operational Data"></a>Dedicated Storage for Operational Data</h3><h4 id="Ops-Manager-Application-Database"><a href="#Ops-Manager-Application-Database" class="headerlink" title="Ops Manager Application Database"></a>Ops Manager Application Database</h4><ol>
+<li>建议使用复制集保存数据</li>
+<li>保存两类数据：监控数据 、 Metadata信息</li>
+</ol>
+<h4 id="Snapshot-Storage"><a href="#Snapshot-Storage" class="headerlink" title="Snapshot Storage"></a>Snapshot Storage</h4><ol>
+<li>local database</li>
+<li>local file systems</li>
+<li>cloud-based data store</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/03/MongoDB-3-4-Storage-Engine/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2051,7 +2272,7 @@ db.system.profile.aggregate([ {$group : { _id : {op : &quot;$op&quot;, ns : &quo
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-count">9</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
