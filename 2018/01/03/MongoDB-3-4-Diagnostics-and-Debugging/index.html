@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.3" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.3">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.3">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.3" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="server log 遇到问题先看log  1&amp;lt;timestamp&amp;gt; &amp;lt;severity&amp;gt; &amp;lt;component&amp;gt; [&amp;lt;context&amp;gt;] &amp;lt;message&amp;gt; 修改log的级别12db.getLogComponents()db.setLogLevel(-1, &amp;quot;query&amp;quot;) logrotate–logRotate默认">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MongoDB 3.4 - Diagnostics and Debugging">
+<meta property="og:url" content="http://yoursite.com/2018/01/03/MongoDB-3-4-Diagnostics-and-Debugging/index.html">
+<meta property="og:site_name" content="Feng">
+<meta property="og:description" content="server log 遇到问题先看log  1&amp;lt;timestamp&amp;gt; &amp;lt;severity&amp;gt; &amp;lt;component&amp;gt; [&amp;lt;context&amp;gt;] &amp;lt;message&amp;gt; 修改log的级别12db.getLogComponents()db.setLogLevel(-1, &amp;quot;query&amp;quot;) logrotate–logRotate默认">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2018-01-03T02:17:59.762Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MongoDB 3.4 - Diagnostics and Debugging">
+<meta name="twitter:description" content="server log 遇到问题先看log  1&amp;lt;timestamp&amp;gt; &amp;lt;severity&amp;gt; &amp;lt;component&amp;gt; [&amp;lt;context&amp;gt;] &amp;lt;message&amp;gt; 修改log的级别12db.getLogComponents()db.setLogLevel(-1, &amp;quot;query&amp;quot;) logrotate–logRotate默认">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.3',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/01/03/MongoDB-3-4-Diagnostics-and-Debugging/"/>
+
+
+
+
+
+  <title>MongoDB 3.4 - Diagnostics and Debugging | Feng</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Feng</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/03/MongoDB-3-4-Diagnostics-and-Debugging/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Feng">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Feng">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">MongoDB 3.4 - Diagnostics and Debugging</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-03T10:17:46+08:00">
+                2018-01-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="server-log"><a href="#server-log" class="headerlink" title="server log"></a>server log</h2><ol>
+<li>遇到问题先看log</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;timestamp&gt; &lt;severity&gt; &lt;component&gt; [&lt;context&gt;] &lt;message&gt;</span><br></pre></td></tr></table></figure>
+<h3 id="修改log的级别"><a href="#修改log的级别" class="headerlink" title="修改log的级别"></a>修改log的级别</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">db.getLogComponents()</span><br><span class="line">db.setLogLevel(-1, &quot;query&quot;)</span><br></pre></td></tr></table></figure>
+<h3 id="logrotate"><a href="#logrotate" class="headerlink" title="logrotate"></a>logrotate</h3><p>–logRotate默认参数是rename，会在原来的日志文件后面加上一个时间戳，如果使用参数reopen，则必须指定参数–logappend<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">db.adminCommand( &#123; logRotate : 1 &#125; )</span><br></pre></td></tr></table></figure></p>
+<h2 id="db-serverStatus"><a href="#db-serverStatus" class="headerlink" title="db.serverStatus()"></a>db.serverStatus()</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line">&gt; Object.keys(db.serverStatus())</span><br><span class="line">[</span><br><span class="line">        &quot;host&quot;,</span><br><span class="line">        &quot;version&quot;,</span><br><span class="line">        &quot;process&quot;,</span><br><span class="line">        &quot;pid&quot;,</span><br><span class="line">        &quot;uptime&quot;,</span><br><span class="line">        &quot;uptimeMillis&quot;,</span><br><span class="line">        &quot;uptimeEstimate&quot;,</span><br><span class="line">        &quot;localTime&quot;,</span><br><span class="line">        &quot;asserts&quot;,</span><br><span class="line">        &quot;connections&quot;,</span><br><span class="line">        &quot;extra_info&quot;,</span><br><span class="line">        &quot;globalLock&quot;,</span><br><span class="line">        &quot;locks&quot;,</span><br><span class="line">        &quot;network&quot;,</span><br><span class="line">        &quot;opLatencies&quot;,</span><br><span class="line">        &quot;opcounters&quot;,</span><br><span class="line">        &quot;opcountersRepl&quot;,</span><br><span class="line">        &quot;storageEngine&quot;,</span><br><span class="line">        &quot;tcmalloc&quot;,</span><br><span class="line">        &quot;wiredTiger&quot;,</span><br><span class="line">        &quot;mem&quot;,</span><br><span class="line">        &quot;metrics&quot;,</span><br><span class="line">        &quot;ok&quot;</span><br><span class="line">]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"># for loop that iterates over few documents with a sleep</span><br><span class="line">mongo --eval &apos; while(true) &#123; for (i=1; i&lt;=10; i++)&#123;</span><br><span class="line">  db.things.insertOne(&#123;&#125;); sleep(1000);</span><br><span class="line">&#125;&#125; &apos;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&gt; db.serverStatus().localTime</span><br><span class="line">ISODate(&quot;2017-10-26T07:55:44.169Z&quot;)</span><br><span class="line"></span><br><span class="line">&gt; db.serverStatus().locks</span><br><span class="line">&#123;</span><br><span class="line">        &quot;Global&quot; : &#123;</span><br><span class="line">                &quot;acquireCount&quot; : &#123;</span><br><span class="line">                        &quot;r&quot; : NumberLong(2340),</span><br><span class="line">                        &quot;w&quot; : NumberLong(7),</span><br><span class="line">                        &quot;W&quot; : NumberLong(3)</span><br><span class="line">                &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;Database&quot; : &#123;</span><br><span class="line">                &quot;acquireCount&quot; : &#123;</span><br><span class="line">                        &quot;r&quot; : NumberLong(767),</span><br><span class="line">                        &quot;R&quot; : NumberLong(11),</span><br><span class="line">                        &quot;W&quot; : NumberLong(7)</span><br><span class="line">                &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;Collection&quot; : &#123;</span><br><span class="line">                &quot;acquireCount&quot; : &#123;</span><br><span class="line">                        &quot;r&quot; : NumberLong(767)</span><br><span class="line">                &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        &quot;Metadata&quot; : &#123;</span><br><span class="line">                &quot;acquireCount&quot; : &#123;</span><br><span class="line">                        &quot;w&quot; : NumberLong(1)</span><br><span class="line">                &#125;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>R:shared lock; W: exclusive lock; r: intent shared lock; w: intent exclusive lock</p>
+<p>opcounters只记录操作数，不包含受影响的document统计；metrics.document包含操作影响到的document</p>
+<p>db.serverStatus().globalLock.totalTime如果和uptime接近，表示数据库一直有锁的性能问题</p>
+<p>db.serverStatus().globalLock.currentQueue.total 表示实时的锁统计信息  </p>
+</blockquote>
+<h2 id="profiler"><a href="#profiler" class="headerlink" title="profiler"></a>profiler</h2><ul>
+<li>针对数据库级别的，非整个mongod server</li>
+<li>{0:off,1:slow,2:whole}</li>
+<li>db.system.profile 是一个capped集合，默认大小1m</li>
+<li>默认slow operation阀值100ms</li>
+<li>不能在mongos打开profiler，需要在cluster内的每个mongod上操作</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&gt;db.setProfilingLevel(2)</span><br><span class="line">&gt;db.system.profile.find().pretty()</span><br><span class="line">&gt;db.system.profile.find().sort(&#123;$natural: -1&#125;).limit(1).pretty()</span><br><span class="line">&gt;db.getProfilingStatus()</span><br><span class="line">&gt;db.system.profile.aggregate( [ &#123; $group : &#123;_id : &quot;$op&quot;, count : &#123; $sum : 1&#125;&#125;&#125;])</span><br></pre></td></tr></table></figure>
+<h2 id="indexStats"><a href="#indexStats" class="headerlink" title="indexStats"></a>indexStats</h2><ol>
+<li>可以使用$indeStats查看哪些索引没有被使用</li>
+<li>复制集内的各节点单独计数</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">db.people.aggregate( [ &#123; $indexStats : &#123; &#125; &#125; ] ).pretty()</span><br><span class="line"></span><br><span class="line">db.people.aggregate( [</span><br><span class="line">  &#123; $indexStats : &#123; &#125; &#125;,</span><br><span class="line">  &#123; $project : &#123; key: 1, &quot;accesses.ops&quot;: 1 &#125; &#125;</span><br><span class="line">] ).pretty()</span><br></pre></td></tr></table></figure>
+<h2 id="慢查询"><a href="#慢查询" class="headerlink" title="慢查询"></a>慢查询</h2><h3 id="导致的因素"><a href="#导致的因素" class="headerlink" title="导致的因素:"></a>导致的因素:</h3><ol>
+<li>working set大小超过内存</li>
+</ol>
+<h2 id="mtools"><a href="#mtools" class="headerlink" title="mtools"></a>mtools</h2><h3 id="mloginfo"><a href="#mloginfo" class="headerlink" title="mloginfo"></a>mloginfo</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line">mloginfo --queries --no-progressbar mongodb.log</span><br><span class="line">     source: mongodb.log</span><br><span class="line">       host: dc1custdb06:27000</span><br><span class="line">      start: 2017 Oct 25 20:04:16.308</span><br><span class="line">        end: 2017 Oct 26 10:41:55.182</span><br><span class="line">date format: iso8601-local</span><br><span class="line">     length: 237443</span><br><span class="line">     binary: mongod</span><br><span class="line">    version: 3.4.6</span><br><span class="line">    storage: wiredTiger</span><br><span class="line"></span><br><span class="line">QUERIES</span><br><span class="line">namespace                          operation    pattern                                 count    min (ms)    max (ms)    mean (ms)    95%-ile (ms)    sum (ms)</span><br><span class="line"></span><br><span class="line">mucem.metricData                   find         &#123;&quot;dataType&quot;: 1, &quot;metricData&quot;: 1&#125;        64956         100     1314642         2826          2273.0    183600980</span><br><span class="line">mucem.individual                   find         &#123;&quot;indivCerts.certNum&quot;: 1&#125;                4883         100       93637         1773          9577.9    8662154</span><br><span class="line">mucem.mumobileAccount              find         &#123;&quot;lstUpdTime&quot;: 1, &quot;prcSts&quot;: 1&#125;            685         120     1548426         5301          2878.2    3631317</span><br><span class="line">mucem.muAppUserInfo                find         &#123;&quot;_id&quot;: 1&#125;                                438         110       52225         5786        17874.15    2534591</span><br><span class="line">mucem.individual                   find         &#123;&quot;memberships.memshpCardNo&quot;: 1&#125;          1165         100       94250         2051          9986.2    2389683</span><br><span class="line">local.clustermanager               find         None                                      435         100       52231         4706         16964.0    2047117</span><br><span class="line">mucem.mumobileAccount              find         &#123;&quot;_id&quot;: 1&#125;                                269         100       83832         7591         28043.0    2042084</span><br><span class="line">mucem.muAppUserInfo                find         &#123;&quot;lstUpdTime&quot;: 1, &quot;prcSts&quot;: 1&#125;            122         100      278448        16023        69047.45    1954891</span><br><span class="line">mucem.paxEvt                       find         &#123;&quot;lstUpdTime&quot;: 1, &quot;paxEvtPrcSts&quot;: 1&#125;      180         101     1198138        10065         1916.25    1811708</span><br><span class="line">mucem.abnorFltEvt                  find         &#123;&quot;abnorFltEvtPrcSts&quot;: 1&#125;                   82         102      208458        17830         88588.7    1462116</span><br><span class="line">mucem.mumobileAccount              find         &#123;&quot;crtTime&quot;: &#123;&quot;$ne&quot;: 1&#125;&#125;                   125         242      708768        11449         10282.2    1431224</span><br><span class="line">mucemcustprofilepsdp.individual    count        &#123;&quot;mobiles.numBody&quot;: 1&#125;                    456         100      248685         3001        12686.75    1368538</span><br><span class="line">mucemcustprofilepsdp.metricData    find         &#123;&quot;dataType&quot;: 1, &quot;metricData&quot;: 1&#125;          283         100       56042         3085         17011.3    873298</span><br><span class="line">local.system.replset               find         None                                      100         102       34156         6839        18707.45    683970</span><br><span class="line">mucem.individual                   update       &#123;&quot;_id&quot;: 1&#125;                               2021         100        5554          138           198.0    280099</span><br><span class="line">mucem.individual                   count        &#123;&quot;mobiles.numBody&quot;: 1&#125;                    188         100       39015         1468         6539.15    276109</span><br><span class="line">admin.system.users                 find         &#123;&#125;                                         43         103       22636         4455         13284.6    191586</span><br><span class="line">local.oplog.rs                     getmore      None                                        1       60444       60444        60444         60444.0    60444</span><br><span class="line">mucem.labelLibraryData             update       &#123;&quot;_id&quot;: 1&#125;                                 89         101        5565          629          5500.0    56042</span><br><span class="line">mucem.custDtl                      update       &#123;&quot;_id&quot;: 1&#125;                                 80         100        5541          690          5529.1    55249</span><br><span class="line">mucem.custMonth                    find         &#123;&quot;indvlCardNbr&quot;: 1&#125;                       147         100        5555          156           175.7    23071</span><br><span class="line">mucem.custDtl                      find         &#123;&quot;lstUpdTime&quot;: 1, &quot;status&quot;: 1&#125;             85         100        5552          256           196.6    21809</span><br><span class="line">mucem.custDest                     find         &#123;&quot;indvlCardNbr&quot;: 1&#125;                       114         100        5554          171           186.8    19567</span><br><span class="line">mucem.muAppUserInfo                find         None                                        8         118       13605         2196          9923.0    17571</span><br><span class="line">mucem.paxEvt                       update       &#123;&quot;_id&quot;: 1&#125;                                 68         101        5533          255          486.95    17358</span><br><span class="line">mucem.custOrig                     find         &#123;&quot;indvlCardNbr&quot;: 1&#125;                       132         100         263          118           188.5    15700</span><br><span class="line">mucem.individual                   update       &#123;&quot;custId&quot;: 1&#125;                              38         100        5573          408         1050.85    15534</span><br><span class="line">mucem.custLine                     find         &#123;&quot;indvlCardNbr&quot;: 1&#125;                       122         100         218          120           182.9    14710</span><br><span class="line">mucem.labelLibraryData             find         &#123;&quot;lstUpdTime&quot;: 1, &quot;status&quot;: 1&#125;             24         102        5549          597          4749.4    14335</span><br><span class="line">mucem.custAircraft                 find         &#123;&quot;indvlCardNbr&quot;: 1&#125;                       111         100         231          127           222.0    14128</span><br><span class="line">mucem.muAppUserInfo                update       &#123;&quot;_id&quot;: 1&#125;                                 69         100        4006          179           178.2    12381</span><br><span class="line">mucem.individual                   find         &#123;&quot;mobiles.numBody&quot;: 1&#125;                     28         105        1845          425          1538.2    11923</span><br><span class="line">mucem.mumobileAccount              update       &#123;&quot;_id&quot;: 1&#125;                                 18         105         511          300           483.8    5414</span><br><span class="line">mucemcustprofilepsdp.metricData    update       &#123;&quot;_id&quot;: 1&#125;                                  3         106         225          150           214.6    452</span><br><span class="line">local.oplog.rs                     find         &#123;&quot;ts&quot;: 1&#125;                                   1         162         162          162           162.0    162</span><br><span class="line">mucem.metricData                   update       &#123;&quot;_id&quot;: 1&#125;                                  1         107         107          107           107.0    107</span><br></pre></td></tr></table></figure>
+<h3 id="mplotqueries"><a href="#mplotqueries" class="headerlink" title="mplotqueries"></a>mplotqueries</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mplotqueries mongodb.log</span><br></pre></td></tr></table></figure>
+<h3 id="mlogvis"><a href="#mlogvis" class="headerlink" title="mlogvis"></a>mlogvis</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mlogvis --no-browser mongodb.log</span><br></pre></td></tr></table></figure>
+<h2 id="timeout"><a href="#timeout" class="headerlink" title="timeout"></a>timeout</h2><ol>
+<li>serverSelectionTimeoutError: 发生在client端，当没有可用的server时候</li>
+<li>WTimeoutError： db.foo.insertOne({hello : ‘world’}, {writeConcern : {w : 3, wtimeout : 2}) 如果2ms内没有完成，写入还是会做，但是会报错。</li>
+<li>ExecutionTimeout: cursor parameter,如果在规定时间内没有执行完成，返回错误; db.collection.find({})._addSpecial(“$maxTimes”, 100)</li>
+<li>networkTimeout： 和网络配置相关</li>
+</ol>
+<h2 id="closing-and-dropping-connections"><a href="#closing-and-dropping-connections" class="headerlink" title="closing and dropping connections"></a>closing and dropping connections</h2><ol>
+<li>连接比较占用虚拟内存 mongostat里面的vsize，每个连接占用1M内存</li>
+<li>default max incoming connection 65536</li>
+<li>配置文件里可以使用maxIncomingConnections设置</li>
+<li>ulimit -a里面的openfile会对连接数有影响；connection、index、collection都是一个文件</li>
+<li>db.serverStatus().connection的数量和ulimit -a有关系</li>
+</ol>
+<h2 id="write-concern-w-majority"><a href="#write-concern-w-majority" class="headerlink" title="write concern(w: majority)"></a>write concern(w: majority)</h2><ol>
+<li>3节点，如果有一个投票节点，data secondary节点发生故障的时候则写入会报错WriteConcernFailed，但是数据还是会写入</li>
+<li>3节点，如果有一个延迟节点，uptodate节点发生故障的时候则写入会报错WriteConcernFailed，但是数据还是会写入</li>
+<li>不要依赖于arbiter和delay节点作为write concern</li>
+</ol>
+<h2 id="schema-issue"><a href="#schema-issue" class="headerlink" title="schema issue"></a>schema issue</h2><ol>
+<li>找出是否有集合扫描</li>
+</ol>
+<pre><code>db.setProfilingLevel(2)
+db.setProfilingLevel(0)
+db.system.profile.count()
+db.system.profile.find({}, {planSummary: 1})
+db.system.profile.find({}, {planSummary: 1, op: 1, query: 1, ns: 1}).pretty()
+db.system.profile.aggregate([ {$group : { _id : {op : &quot;$op&quot;, ns : &quot;$ns&quot;}}} ])
+</code></pre>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/03/MongoDB-3-4-Backup/" rel="next" title="MongoDB 3.4 - Backup">
+                <i class="fa fa-chevron-left"></i> MongoDB 3.4 - Backup
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/01/03/MongoDB-3-4-Storage-Engine/" rel="prev" title="MongoDB 3.4 - Storage Engine">
+                MongoDB 3.4 - Storage Engine <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Feng</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+
+          <div class="links-of-author motion-element">
+            
+          </div>
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#server-log"><span class="nav-number">1.</span> <span class="nav-text">server log</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#修改log的级别"><span class="nav-number">1.1.</span> <span class="nav-text">修改log的级别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#logrotate"><span class="nav-number">1.2.</span> <span class="nav-text">logrotate</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#db-serverStatus"><span class="nav-number">2.</span> <span class="nav-text">db.serverStatus()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#profiler"><span class="nav-number">3.</span> <span class="nav-text">profiler</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#indexStats"><span class="nav-number">4.</span> <span class="nav-text">indexStats</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#慢查询"><span class="nav-number">5.</span> <span class="nav-text">慢查询</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#导致的因素"><span class="nav-number">5.1.</span> <span class="nav-text">导致的因素:</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mtools"><span class="nav-number">6.</span> <span class="nav-text">mtools</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mloginfo"><span class="nav-number">6.1.</span> <span class="nav-text">mloginfo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mplotqueries"><span class="nav-number">6.2.</span> <span class="nav-text">mplotqueries</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mlogvis"><span class="nav-number">6.3.</span> <span class="nav-text">mlogvis</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#timeout"><span class="nav-number">7.</span> <span class="nav-text">timeout</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#closing-and-dropping-connections"><span class="nav-number">8.</span> <span class="nav-text">closing and dropping connections</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#write-concern-w-majority"><span class="nav-number">9.</span> <span class="nav-text">write concern(w: majority)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#schema-issue"><span class="nav-number">10.</span> <span class="nav-text">schema issue</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Feng</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a> v5.1.3</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.3"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.3"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.3"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.3"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

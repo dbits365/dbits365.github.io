@@ -79,17 +79,17 @@
 
 
 
-<meta name="description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick">
+<meta name="description" content="备份单个server或者replicatset的方法 mongodump filesystem snapshot backup from secondary (shutdown - copy file - startup)  mongodump 备份全部或者单个database（不会备份local database），–oplog 用mongorestore恢复，–oplogreplay,需要有r">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Hello World">
-<meta property="og:url" content="http://yoursite.com/2017/12/28/hello-world/index.html">
+<meta property="og:title" content="MongoDB 3.4 - Backup">
+<meta property="og:url" content="http://yoursite.com/2018/01/03/MongoDB-3-4-Backup/index.html">
 <meta property="og:site_name" content="Feng">
-<meta property="og:description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick">
+<meta property="og:description" content="备份单个server或者replicatset的方法 mongodump filesystem snapshot backup from secondary (shutdown - copy file - startup)  mongodump 备份全部或者单个database（不会备份local database），–oplog 用mongorestore恢复，–oplogreplay,需要有r">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2017-12-28T03:07:16.589Z">
+<meta property="og:updated_time" content="2018-01-03T02:16:38.307Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hello World">
-<meta name="twitter:description" content="Welcome to Hexo! This is your very first post. Check documentation for more info. If you get any problems when using Hexo, you can find the answer in troubleshooting or you can ask me on GitHub. Quick">
+<meta name="twitter:title" content="MongoDB 3.4 - Backup">
+<meta name="twitter:description" content="备份单个server或者replicatset的方法 mongodump filesystem snapshot backup from secondary (shutdown - copy file - startup)  mongodump 备份全部或者单个database（不会备份local database），–oplog 用mongorestore恢复，–oplogreplay,需要有r">
 
 
 
@@ -119,13 +119,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2017/12/28/hello-world/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/01/03/MongoDB-3-4-Backup/"/>
 
 
 
 
 
-  <title>Hello World | Feng</title>
+  <title>MongoDB 3.4 - Backup | Feng</title>
   
 
 
@@ -242,7 +242,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/12/28/hello-world/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/03/MongoDB-3-4-Backup/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Feng">
@@ -259,7 +259,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Hello World</h1>
+          <h1 class="post-title" itemprop="name headline">MongoDB 3.4 - Backup</h1>
         
 
         <div class="post-meta">
@@ -271,8 +271,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-28T11:07:16+08:00">
-                2017-12-28
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-03T10:15:45+08:00">
+                2018-01-03
               </time>
             
 
@@ -309,15 +309,46 @@
       
 
       
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
+        <h2 id="备份单个server或者replicatset的方法"><a href="#备份单个server或者replicatset的方法" class="headerlink" title="备份单个server或者replicatset的方法"></a>备份单个server或者replicatset的方法</h2><ol>
+<li>mongodump</li>
+<li>filesystem snapshot</li>
+<li>backup from secondary (shutdown - copy file - startup)</li>
+</ol>
+<h3 id="mongodump"><a href="#mongodump" class="headerlink" title="mongodump"></a>mongodump</h3><ol>
+<li>备份全部或者单个database（不会备份local database），–oplog</li>
+<li>用mongorestore恢复，–oplogreplay,需要有resotre的role，如果被恢复的备份含有system.profile,但是目标数据库上没有，会创建system.profile，但是不会恢复数据</li>
+<li>产生的是BSON文件，对于小的数据库比较适用</li>
+<li>mongodump只备份document，但是mongorestore在恢复完数据后会rebuild索引</li>
+<li>mongodump会影响数据库性能，如果数据库很大，可能会消耗光内存产生page fault</li>
+</ol>
+<h3 id="文件系统快照"><a href="#文件系统快照" class="headerlink" title="文件系统快照"></a>文件系统快照</h3><ol>
+<li>使用lvm或者存储的快照机制</li>
+<li>开启journal</li>
+<li>db.fsyncLock()–把数据flush到磁盘，禁止写入新的数据 – snapshot – db.fsyncUnlock(); 这个期间可能无法对数据库进行查询</li>
+</ol>
+<blockquote>
+<p>注意：在使用db.fsyncLock()期间，不要断开session，否则可能会无法重新连接到数据库</p>
+</blockquote>
+<h3 id="备份sharded-cluster"><a href="#备份sharded-cluster" class="headerlink" title="备份sharded cluster"></a>备份sharded cluster</h3><ol>
+<li>关闭balancer  sh.stopBalancer(),如果在进行chunk migration，需要等待结束</li>
+<li>备份config database  mongodump –db config</li>
+<li>备份每一个分片</li>
+<li>开启balancer </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"># back up a shard cluster</span><br><span class="line"></span><br><span class="line">mongo --host 	some_mongos --eval &quot;sh.stopBalancer()&quot;</span><br><span class="line"># make sure that worked!</span><br><span class="line"></span><br><span class="line"># back up config database / a config server</span><br><span class="line">mongdump --host some_mongos_or_config_server --db config</span><br><span class="line"></span><br><span class="line"># back up all shards</span><br><span class="line">mongodump --host shard1_svr1 --oplog /backups/cluster1/shard1</span><br><span class="line">mongodump --host shard2_svr1 --oplog /backups/cluster1/shard2</span><br><span class="line">mongodump --host shard3_svr1 --oplog /backups/cluster1/shard3</span><br><span class="line">mongodump --host shard4_svr1 --oplog /backups/cluster1/shard4</span><br><span class="line">mongodump --host shard5_svr1 --oplog /backups/cluster1/shard5</span><br><span class="line">mongodump --host shard6_svr1 --oplog /backups/cluster1/shard6</span><br><span class="line"></span><br><span class="line"># balancer back on</span><br><span class="line">mongo --host some_mongos --eval &quot;sh.startBalancer()&quot;</span><br></pre></td></tr></table></figure>
+<h2 id="一些特性"><a href="#一些特性" class="headerlink" title="一些特性"></a>一些特性</h2><h3 id="capped-collections"><a href="#capped-collections" class="headerlink" title="capped collections"></a>capped collections</h3><ol>
+<li>circle queue</li>
+<li>least-recently-insert order</li>
+<li>preallocated max size</li>
+<li>can’t delete or grow</li>
+</ol>
+<h3 id="TTL-Collections"><a href="#TTL-Collections" class="headerlink" title="TTL Collections"></a>TTL Collections</h3><ol>
+<li>auto ageout of documents</li>
+<li>create special index</li>
+</ol>
+<h3 id="Grid-FS"><a href="#Grid-FS" class="headerlink" title="Grid FS"></a>Grid FS</h3><ol>
+<li>BSON file size limited 16MB<br>`</li>
+</ol>
 
       
     </div>
@@ -342,14 +373,18 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
+              <a href="/2018/01/03/MongoDB-3-4-Scalability/" rel="next" title="MongoDB 3.4 - Scalability">
+                <i class="fa fa-chevron-left"></i> MongoDB 3.4 - Scalability
+              </a>
+            
           </div>
 
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2018/01/02/MongoDB-3-4-Performance/" rel="prev" title="MongoDB 3.4 - Performance">
-                MongoDB 3.4 - Performance <i class="fa fa-chevron-right"></i>
+              <a href="/2018/01/03/MongoDB-3-4-Diagnostics-and-Debugging/" rel="prev" title="MongoDB 3.4 - Diagnostics and Debugging">
+                MongoDB 3.4 - Diagnostics and Debugging <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -466,7 +501,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Quick-Start"><span class="nav-number">1.</span> <span class="nav-text">Quick Start</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Create-a-new-post"><span class="nav-number">1.1.</span> <span class="nav-text">Create a new post</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Run-server"><span class="nav-number">1.2.</span> <span class="nav-text">Run server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Generate-static-files"><span class="nav-number">1.3.</span> <span class="nav-text">Generate static files</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Deploy-to-remote-sites"><span class="nav-number">1.4.</span> <span class="nav-text">Deploy to remote sites</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#备份单个server或者replicatset的方法"><span class="nav-number">1.</span> <span class="nav-text">备份单个server或者replicatset的方法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mongodump"><span class="nav-number">1.1.</span> <span class="nav-text">mongodump</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#文件系统快照"><span class="nav-number">1.2.</span> <span class="nav-text">文件系统快照</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#备份sharded-cluster"><span class="nav-number">1.3.</span> <span class="nav-text">备份sharded cluster</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一些特性"><span class="nav-number">2.</span> <span class="nav-text">一些特性</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#capped-collections"><span class="nav-number">2.1.</span> <span class="nav-text">capped collections</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#TTL-Collections"><span class="nav-number">2.2.</span> <span class="nav-text">TTL Collections</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Grid-FS"><span class="nav-number">2.3.</span> <span class="nav-text">Grid FS</span></a></li></ol></li></ol></div>
             
 
           </div>
