@@ -79,17 +79,19 @@
 
 
 
-<meta name="description" content="sharding &amp;amp; data distribute分片的好处：  查询（落在分片上，可以直接读取对应的分片） 排序  chunks chunks的默认大小64M step1 split chunk的大小超过限制后，分裂为2个chunk，但是还在原来的分片上； step2 migrate 均衡chunks在分片上的数量 chunk size 小，migrate多，数据在分片上分布更均匀，但">
+<meta name="description" content="Backup PreparationsBackup Process一旦开始，就是一个持续的过程，数据同步类似复制集  initial sync 备份当前所有的数据 （包含所有的shard和config server） 按照快照计划（snapshot schedule）执行快照（data directory），并将快照传输到存储系统 持续监控oplog，将新的数据操作更新到Ops manager">
 <meta property="og:type" content="article">
-<meta property="og:title" content="MongoDB 3.4 - Scalability">
-<meta property="og:url" content="http://yoursite.com/2018/01/03/MongoDB-3-4-Scalability/index.html">
+<meta property="og:title" content="MongoDB - Ops Manager Backup &amp; Restore">
+<meta property="og:url" content="http://yoursite.com/2018/01/10/MongoDB-Ops-Manager-Backup-Restore/index.html">
 <meta property="og:site_name" content="Feng">
-<meta property="og:description" content="sharding &amp;amp; data distribute分片的好处：  查询（落在分片上，可以直接读取对应的分片） 排序  chunks chunks的默认大小64M step1 split chunk的大小超过限制后，分裂为2个chunk，但是还在原来的分片上； step2 migrate 均衡chunks在分片上的数量 chunk size 小，migrate多，数据在分片上分布更均匀，但">
+<meta property="og:description" content="Backup PreparationsBackup Process一旦开始，就是一个持续的过程，数据同步类似复制集  initial sync 备份当前所有的数据 （包含所有的shard和config server） 按照快照计划（snapshot schedule）执行快照（data directory），并将快照传输到存储系统 持续监控oplog，将新的数据操作更新到Ops manager">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-01-03T02:33:01.368Z">
+<meta property="og:image" content="https://docs.opsmanager.mongodb.com/current/_images/backup-flow.png">
+<meta property="og:updated_time" content="2018-01-10T05:59:18.530Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="MongoDB 3.4 - Scalability">
-<meta name="twitter:description" content="sharding &amp;amp; data distribute分片的好处：  查询（落在分片上，可以直接读取对应的分片） 排序  chunks chunks的默认大小64M step1 split chunk的大小超过限制后，分裂为2个chunk，但是还在原来的分片上； step2 migrate 均衡chunks在分片上的数量 chunk size 小，migrate多，数据在分片上分布更均匀，但">
+<meta name="twitter:title" content="MongoDB - Ops Manager Backup &amp; Restore">
+<meta name="twitter:description" content="Backup PreparationsBackup Process一旦开始，就是一个持续的过程，数据同步类似复制集  initial sync 备份当前所有的数据 （包含所有的shard和config server） 按照快照计划（snapshot schedule）执行快照（data directory），并将快照传输到存储系统 持续监控oplog，将新的数据操作更新到Ops manager">
+<meta name="twitter:image" content="https://docs.opsmanager.mongodb.com/current/_images/backup-flow.png">
 
 
 
@@ -119,13 +121,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/01/03/MongoDB-3-4-Scalability/"/>
+  <link rel="canonical" href="http://yoursite.com/2018/01/10/MongoDB-Ops-Manager-Backup-Restore/"/>
 
 
 
 
 
-  <title>MongoDB 3.4 - Scalability | Feng</title>
+  <title>MongoDB - Ops Manager Backup & Restore | Feng</title>
   
 
 
@@ -252,7 +254,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/03/MongoDB-3-4-Scalability/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/10/MongoDB-Ops-Manager-Backup-Restore/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Feng">
@@ -269,7 +271,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">MongoDB 3.4 - Scalability</h1>
+          <h1 class="post-title" itemprop="name headline">MongoDB - Ops Manager Backup & Restore</h1>
         
 
         <div class="post-meta">
@@ -281,8 +283,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-03T10:15:00+08:00">
-                2018-01-03
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-10T11:36:42+08:00">
+                2018-01-10
               </time>
             
 
@@ -322,9 +324,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/01/03/MongoDB-3-4-Scalability/#comments" itemprop="discussionUrl">
+                <a href="/2018/01/10/MongoDB-Ops-Manager-Backup-Restore/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2018/01/03/MongoDB-3-4-Scalability/" itemprop="commentCount"></span>
+                        data-disqus-identifier="2018/01/10/MongoDB-Ops-Manager-Backup-Restore/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -352,60 +354,34 @@
       
 
       
-        <h3 id="sharding-amp-data-distribute"><a href="#sharding-amp-data-distribute" class="headerlink" title="sharding &amp; data distribute"></a>sharding &amp; data distribute</h3><p>分片的好处：</p>
+        <h2 id="Backup-Preparations"><a href="#Backup-Preparations" class="headerlink" title="Backup Preparations"></a>Backup Preparations</h2><h2 id="Backup-Process"><a href="#Backup-Process" class="headerlink" title="Backup Process"></a>Backup Process</h2><p>一旦开始，就是一个持续的过程，数据同步类似复制集</p>
 <ol>
-<li>查询（落在分片上，可以直接读取对应的分片）</li>
-<li>排序</li>
+<li>initial sync 备份当前所有的数据 （包含所有的shard和config server）</li>
+<li>按照快照计划（snapshot schedule）执行快照（data directory），并将快照传输到存储系统</li>
+<li>持续监控oplog，将新的数据操作更新到Ops manager</li>
 </ol>
-<h3 id="chunks"><a href="#chunks" class="headerlink" title="chunks"></a>chunks</h3><ul>
-<li>chunks的默认大小64M</li>
-<li>step1 split chunk的大小超过限制后，分裂为2个chunk，但是还在原来的分片上； step2 migrate 均衡chunks在分片上的数量</li>
-<li>chunk size 小，migrate多，数据在分片上分布更均匀，但是对config server的开销越大； chunk size 大，migrate少，数据在分片上分布可能不太均衡</li>
-<li>连续的chunks不保证在一个shard上</li>
-<li>修改chunk size (1-1024M)</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">connect to mongos</span><br><span class="line">use config</span><br><span class="line">db.settings.save( &#123; _id:&quot;chunksize&quot;, value: &lt;sizeInMB&gt; &#125; )</span><br></pre></td></tr></table></figure>
-<h3 id="chunk-migration"><a href="#chunk-migration" class="headerlink" title="chunk migration"></a>chunk migration</h3><ol>
-<li>手工：在bulk write之前手动migration</li>
-<li>自动：blancer进程在触发阀值后执行migration（\<20 2;="" 20-79="" 4;="" \="">80 8）</20></li>
-<li>sh.isBalancerRunning(）</li>
-<li>balance进程运行在primary config server上，3.4之前只能有一个migration进程，3.4开始，可以有n/2个（n代表shards的数量）</li>
-</ol>
-<h3 id="Config-Server"><a href="#Config-Server" class="headerlink" title="Config Server"></a>Config Server</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">use config</span><br><span class="line">show collections</span><br></pre></td></tr></table></figure>
-<p>可以将mongos的端口指定为27017<br>admin数据库含有集群用户认证信息<br>config数据库包含集群的metadata信息</p>
-<h3 id="mongos"><a href="#mongos" class="headerlink" title="mongos"></a>mongos</h3><ol>
-<li>sort操作在primary shard上进行，3.2开始，aggr操作可以在任意的shard上进行</li>
-<li>db.isMaster() 反回的”msg” : “isdbgrid”表示连接的是mongos</li>
-<li>sort：每个分片进行$orderby，primary shard最后进行merge sort</li>
-<li>limits：每个分片limit，最后所有的结果再limit，之后返回结果</li>
-<li>skips：不会将skips传递给单个分片，只是最后结果skip</li>
-</ol>
-<h3 id="shard-key"><a href="#shard-key" class="headerlink" title="shard key"></a>shard key</h3><ol>
-<li>经常用于查询的feild</li>
-<li>高基数的字段</li>
-<li>使用组合字段作为shardkey</li>
-<li>递增字段（查询：分散IO到不同的分片上，写入：一直在最后一个分片上） ，BSON objectID递增，使用reverse_id,转化为随机的，或者hash</li>
-<li>非空的集合做分片，必须有一个片键开始的索引</li>
-<li>hash分片只能创建在单独的一个field上</li>
-<li>You cannot select a different shard key for that collection.</li>
-<li>You cannot update the values of the shard key fields.</li>
-<li>hash分片只能用在单个field上，分片更均匀，但是牺牲了Query Isolation。</li>
+<h2 id="Backup-Process-Flows"><a href="#Backup-Process-Flows" class="headerlink" title="Backup Process Flows"></a>Backup Process Flows</h2><h3 id="Initial-Backup"><a href="#Initial-Backup" class="headerlink" title="Initial Backup"></a>Initial Backup</h3><p><img src="https://docs.opsmanager.mongodb.com/current/_images/backup-flow.png" alt=""></p>
+<ol>
+<li>Backup Agent连接到mongod</li>
+<li>starting阶段：开始初始化同步（initial sync），backup agent将数据按10MB（压缩）为单位的slice，传输到ops manager；备份时间点开始后的数据另外备份</li>
+<li>transferring阶段：backup Daemon将slice传输到Oplog Store（临时的）</li>
+<li>Backup agent同时抓取oplog，10MB（压缩）为单位的oplog slice</li>
+<li>building阶段：所有的slice接收完毕，Ops manager创建本地的数据库副本（head database），head database位于运行backup Daemon的主机上</li>
+<li>backup Daemon从Oplog Store读取数据，并插入head database</li>
+<li>applying oplogs阶段：将oplog数据插入head database</li>
+<li>fetching missing documents阶段：Ops Manager检查生产数据库，并将遗漏的数据插入head database</li>
+<li>creating indexes阶段：在head database上按照生产数据库的信息创建index</li>
+<li>定时创建快照备份数据库，快照存储的方式支持：Blockstore Database、AWS S3、File system</li>
 </ol>
 <blockquote>
-<p>没有shard的database，一般默认放在primary shard，挑选一个数据量最小的分片做为primary shard，可以使用movePrimary移动数据库，但是会影响数据访问</p>
+<p>3和4同步进行</p>
 </blockquote>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">mongos&gt; db.adminCommand( &#123; listDatabases: 1 &#125; )</span><br><span class="line">&#123;</span><br><span class="line">    &quot;databases&quot; : [</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;name&quot; : &quot;test&quot;,</span><br><span class="line">            &quot;sizeOnDisk&quot; : 65536,</span><br><span class="line">            &quot;empty&quot; : false,</span><br><span class="line">            &quot;shards&quot; : &#123;</span><br><span class="line">                &quot;shard01&quot; : 65536</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;name&quot; : &quot;admin&quot;,</span><br><span class="line">            &quot;sizeOnDisk&quot; : 114688,</span><br><span class="line">            &quot;empty&quot; : false</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            &quot;name&quot; : &quot;config&quot;,</span><br><span class="line">            &quot;sizeOnDisk&quot; : 503808,</span><br><span class="line">            &quot;empty&quot; : false</span><br><span class="line">        &#125;</span><br><span class="line">    ],</span><br><span class="line">    &quot;totalSize&quot; : 684032,</span><br><span class="line">    &quot;totalSizeMb&quot; : 0,</span><br><span class="line">    &quot;ok&quot; : 1</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h3 id="shard-key-index"><a href="#shard-key-index" class="headerlink" title="shard key index"></a>shard key index</h3><ol>
-<li>分片的collection必须有一个shard key的索引（index、compound index with prefix）</li>
-<li>分片的集合，只有_id和片键可以有唯一索引，其他字段不能有唯一索引（因为索引都是local创建的，没办法保证cluster范围内唯一）</li>
-</ol>
-<h3 id="shard限制"><a href="#shard限制" class="headerlink" title="shard限制"></a>shard限制</h3><ol>
-<li>group | db.eval() | $where | $isolated | $snapshot | geoSearch</li>
-<li>updateOne() removeOne() deleteOne()必须在查询条件中包含shard key或_id</li>
-</ol>
-<h3 id="config-server-HA"><a href="#config-server-HA" class="headerlink" title="config server HA"></a>config server HA</h3><ol>
-<li>如果config server没能选出primary，任然可以对分片读写，但是chunk的migration和split无法进行</li>
-<li>数据保存在config数据库内，要备份！！！！</li>
+<h3 id="Subsequent-Backups"><a href="#Subsequent-Backups" class="headerlink" title="Subsequent Backups"></a>Subsequent Backups</h3><ol>
+<li>Backup Agent抓取生产数据库的oplog</li>
+<li>Backup Agnet将oplog slice发送到Ops Manager</li>
+<li>将oplog slice存储在Oplog Store中</li>
+<li>将新的oplog应用到head database</li>
+<li>根据snapshot schedule定制执行快照</li>
 </ol>
 
       
@@ -431,8 +407,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/01/03/MongoDB-3-4-replication/" rel="next" title="MongoDB 3.4 - replication">
-                <i class="fa fa-chevron-left"></i> MongoDB 3.4 - replication
+              <a href="/2018/01/03/MongoDB-Ops-Manager-Overview/" rel="next" title="MongoDB - Ops Manager Overview">
+                <i class="fa fa-chevron-left"></i> MongoDB - Ops Manager Overview
               </a>
             
           </div>
@@ -440,10 +416,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/01/03/MongoDB-3-4-Backup/" rel="prev" title="MongoDB 3.4 - Backup">
-                MongoDB 3.4 - Backup <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -578,7 +550,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#sharding-amp-data-distribute"><span class="nav-number">1.</span> <span class="nav-text">sharding &amp; data distribute</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#chunks"><span class="nav-number">2.</span> <span class="nav-text">chunks</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#chunk-migration"><span class="nav-number">3.</span> <span class="nav-text">chunk migration</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Config-Server"><span class="nav-number">4.</span> <span class="nav-text">Config Server</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mongos"><span class="nav-number">5.</span> <span class="nav-text">mongos</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#shard-key"><span class="nav-number">6.</span> <span class="nav-text">shard key</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#shard-key-index"><span class="nav-number">7.</span> <span class="nav-text">shard key index</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#shard限制"><span class="nav-number">8.</span> <span class="nav-text">shard限制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#config-server-HA"><span class="nav-number">9.</span> <span class="nav-text">config server HA</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Backup-Preparations"><span class="nav-number">1.</span> <span class="nav-text">Backup Preparations</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Backup-Process"><span class="nav-number">2.</span> <span class="nav-text">Backup Process</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Backup-Process-Flows"><span class="nav-number">3.</span> <span class="nav-text">Backup Process Flows</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Initial-Backup"><span class="nav-number">3.1.</span> <span class="nav-text">Initial Backup</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Subsequent-Backups"><span class="nav-number">3.2.</span> <span class="nav-text">Subsequent Backups</span></a></li></ol></li></ol></div>
             
 
           </div>
@@ -741,9 +713,9 @@
     
       <script type="text/javascript">
         var disqus_config = function () {
-          this.page.url = 'http://yoursite.com/2018/01/03/MongoDB-3-4-Scalability/';
-          this.page.identifier = '2018/01/03/MongoDB-3-4-Scalability/';
-          this.page.title = 'MongoDB 3.4 - Scalability';
+          this.page.url = 'http://yoursite.com/2018/01/10/MongoDB-Ops-Manager-Backup-Restore/';
+          this.page.identifier = '2018/01/10/MongoDB-Ops-Manager-Backup-Restore/';
+          this.page.title = 'MongoDB - Ops Manager Backup & Restore';
         };
         var d = document, s = d.createElement('script');
         s.src = 'https://http-chnsin365-github-io.disqus.com/embed.js';

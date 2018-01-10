@@ -249,6 +249,187 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/10/MongoDB-Ops-Manager-Backup-Restore/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Feng">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Feng">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/01/10/MongoDB-Ops-Manager-Backup-Restore/" itemprop="url">MongoDB - Ops Manager Backup & Restore</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-10T11:36:42+08:00">
+                2018-01-10
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/MongoDB/" itemprop="url" rel="index">
+                    <span itemprop="name">MongoDB</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/01/10/MongoDB-Ops-Manager-Backup-Restore/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/01/10/MongoDB-Ops-Manager-Backup-Restore/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="Backup-Preparations"><a href="#Backup-Preparations" class="headerlink" title="Backup Preparations"></a>Backup Preparations</h2><h2 id="Backup-Process"><a href="#Backup-Process" class="headerlink" title="Backup Process"></a>Backup Process</h2><p>一旦开始，就是一个持续的过程，数据同步类似复制集</p>
+<ol>
+<li>initial sync 备份当前所有的数据 （包含所有的shard和config server）</li>
+<li>按照快照计划（snapshot schedule）执行快照（data directory），并将快照传输到存储系统</li>
+<li>持续监控oplog，将新的数据操作更新到Ops manager</li>
+</ol>
+<h2 id="Backup-Process-Flows"><a href="#Backup-Process-Flows" class="headerlink" title="Backup Process Flows"></a>Backup Process Flows</h2><h3 id="Initial-Backup"><a href="#Initial-Backup" class="headerlink" title="Initial Backup"></a>Initial Backup</h3><p><img src="https://docs.opsmanager.mongodb.com/current/_images/backup-flow.png" alt=""></p>
+<ol>
+<li>Backup Agent连接到mongod</li>
+<li>starting阶段：开始初始化同步（initial sync），backup agent将数据按10MB（压缩）为单位的slice，传输到ops manager；备份时间点开始后的数据另外备份</li>
+<li>transferring阶段：backup Daemon将slice传输到Oplog Store（临时的）</li>
+<li>Backup agent同时抓取oplog，10MB（压缩）为单位的oplog slice</li>
+<li>building阶段：所有的slice接收完毕，Ops manager创建本地的数据库副本（head database），head database位于运行backup Daemon的主机上</li>
+<li>backup Daemon从Oplog Store读取数据，并插入head database</li>
+<li>applying oplogs阶段：将oplog数据插入head database</li>
+<li>fetching missing documents阶段：Ops Manager检查生产数据库，并将遗漏的数据插入head database</li>
+<li>creating indexes阶段：在head database上按照生产数据库的信息创建index</li>
+<li>定时创建快照备份数据库，快照存储的方式支持：Blockstore Database、AWS S3、File system</li>
+</ol>
+<blockquote>
+<p>3和4同步进行</p>
+</blockquote>
+<h3 id="Subsequent-Backups"><a href="#Subsequent-Backups" class="headerlink" title="Subsequent Backups"></a>Subsequent Backups</h3><ol>
+<li>Backup Agent抓取生产数据库的oplog</li>
+<li>Backup Agnet将oplog slice发送到Ops Manager</li>
+<li>将oplog slice存储在Oplog Store中</li>
+<li>将新的oplog应用到head database</li>
+<li>根据snapshot schedule定制执行快照</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/03/MongoDB-Ops-Manager-Overview/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2272,7 +2453,7 @@ db.system.profile.aggregate([ {$group : { _id : {op : &quot;$op&quot;, ns : &quo
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-count">10</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
