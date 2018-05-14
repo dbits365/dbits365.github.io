@@ -249,6 +249,188 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/05/09/MongoDB分片数据库无法drop集合/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Dbits">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Dbits">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/05/09/MongoDB分片数据库无法drop集合/" itemprop="url">MongoDB分片数据库无法drop集合</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-05-09T13:00:46+08:00">
+                2018-05-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Troubleshooting/" itemprop="url" rel="index">
+                    <span itemprop="name">Troubleshooting</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/05/09/MongoDB分片数据库无法drop集合/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/05/09/MongoDB分片数据库无法drop集合/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="故障现象"><a href="#故障现象" class="headerlink" title="故障现象"></a>故障现象</h2><p>开发在drop一个集合的时候报timeout超时错误。错误信息：Timed out waiting for <strong>db.collection</strong></p>
+<p>此环境为3分片复制集，复制集PSA架构（Primary + Secondary + Arbitor），shard1和shard3上的secondary状态为down。</p>
+<h2 id="故障分析"><a href="#故障分析" class="headerlink" title="故障分析"></a>故障分析</h2><p>分析日志，有大量如下报错信息：<br>    [migrateThread] Waiting for replication to catch up before entering critical section</p>
+<pre><code>[migrateThread] migrate commit waiting for a majority of slaves for &apos;**db.collection**&apos; { SecurityID: MinKey } -&gt; { SecurityID: -9115002770324251294 } waiting for: { ts: Timestamp 1522170033000|3552, t: 4 }
+</code></pre><p>日志显示的chunk migration过程中（shard1向shard3迁移），由于复制集内的1个从节点down掉，活着的是primary和arbitor，本身arbitor只是投票，无实际数据；因此chunk migration的写关注majority无法完成。</p>
+<pre><code>2018-03-28T09:00:17.630+0800 I REPL     [ReplicationExecutor] Error in heartbeat request to mongodb2:28000; HostUnreachable: Connection refused
+2018-03-28T09:00:18.341+0800 I SHARDING [migrateThread] Waiting for replication to catch up before entering critical section
+2018-03-28T09:00:19.347+0800 I SHARDING [migrateThread] Waiting for replication to catch up before entering critical section
+2018-03-28T09:00:19.631+0800 I ASIO     [NetworkInterfaceASIO-Replication-0] Connecting to mongodb2:28000
+/2018-03-28T09:05:35
+2018-03-28T09:05:45.694+0800 I NETWORK  [thread2] connection accepted from 10.1.81.105:46057 #233777 (37 connections now open)
+2018-03-28T09:05:45.695+0800 I NETWORK  [conn233777] received client metadata from 10.1.81.105:46057 conn233777: { driver: { name: &quot;NetworkInterfaceASIO-ShardRegistry&quot;, version: &quot;3.4.10&quot; }, os: { type: &quot;Linux&quot;, name: &quot;Red Hat Enterprise Linux Server release 6.5 (Santiago)&quot;, architecture: &quot;x86_64&quot;, version: &quot;Kernel 2.6.32-431.el6.x86_64&quot; } }
+2018-03-28T09:05:46.020+0800 I SHARDING [conn233766] Refreshing chunks for collection mdgw.hq20171226 based on version 1|584||5a417565916709d86fdb67ea
+2018-03-28T09:05:46.024+0800 I SHARDING [CatalogCacheLoader-15578] Refresh for collection mdgw.hq20171226 took 3 ms and found version 1|584||5a417565916709d86fdb67ea
+2018-03-28T09:05:46.024+0800 I SHARDING [migrateThread] Starting receiving end of migration of chunk { SecurityID: MinKey } -&gt; { SecurityID: -9115002770324251294 } for collection mdgw.hq20171226 from shard1/10.1.81.104:28000,10.1.81.106:28001 at epoch 5a417565916709d86fdb67ea with session id shard1_shard3_5abaea69a678125edaf9de9c
+2018-03-28T09:05:46.027+0800 I SHARDING [migrateThread] Deleter starting delete for: mdgw.hq20171226 from { SecurityID: MinKey } -&gt; { SecurityID: -9115002770324251294 }, with opId: 87092461
+2018-03-28T09:05:46.057+0800 W SHARDING [migrateThread] aborting migration cleanup for chunk { : MinKey } to { : -9115002770324251294 } at document { _id: ObjectId(&apos;5a41912a886ede03c476ce4b&apos;), OrigTime: 20171226080042000, MDStreamID: &quot;010&quot;, SecurityID: &quot;000722.SZ&quot;, Symbol: &quot;&quot;, TradingPhaseCodeStd: &quot;&quot;, PrevClosePrice: 8.6300, OpenPrice: 0, HighPrice: 0, LowPrice: 0, LastPrice: 0, ClosePx: 0, TotalValueTraded: 0.0000, TotalVolumeTraded: 0.00, BuyPrice: [ 41.550000, 41.540000, 41.530000, 41.520000, 41.510000 ], BuyVolume: [ 1613461.00, 1500.00, 1500.00, 1500.00, 1500.00 ], SellPrice: [ 118.010000, 118.050000, 118.060000, 118.100000, 118.130000 ], SellVolume: [ 500.00, 500.00, 900.00, 1100.00, 100.00 ], PrevFundnav: 0, LastFundnav: 0, pe_1: 28.510000, p_highlimit: 9.490000, p_lowlimit: 7.770000 }, collection mdgw.hq20171226 has changed
+2018-03-28T09:05:46.057+0800 I SHARDING [migrateThread] rangeDeleter deleted 0 documents for mdgw.hq20171226 from { SecurityID: MinKey } -&gt; { SecurityID: -9115002770324251294 }
+2018-03-28T09:05:46.057+0800 W SHARDING [migrateThread] new pending chunk [{ SecurityID: MinKey }, { SecurityID: -9115002770324251294 }) overlaps existing pending chunks [{ SecurityID: MinKey }, { SecurityID: -9115002770324251294 }), a migration may not have completed
+2018-03-28T09:05:50.649+0800 I SHARDING [migrateThread] Waiting for replication to catch up before entering critical section
+2018-03-28T09:05:50.649+0800 I SHARDING [migrateThread] migrate commit succeeded flushing to secondaries for &apos;mdgw.hq20171226&apos; { SecurityID: MinKey } -&gt; { SecurityID: -9115002770324251294 }
+2018-03-28T09:06:06.325+0800 I SHARDING [migrateThread] about to log metadata event into changelog: { _id: &quot;mongodb1-2018-03-28T09:06:06.325+0800-5abaea7e2a108a636fdbff5e&quot;, server: &quot;mongodb1&quot;, clientAddr: &quot;&quot;, time: new Date(1522199166325), what: &quot;moveChunk.to&quot;, ns: &quot;mdgw.hq20171226&quot;, details: { min: { SecurityID: MinKey }, max: { SecurityID: -9115002770324251294 }, step 1 of 6: 2, step 2 of 6: 30, step 3 of 6: 4591, step 4 of 6: 0, step 5 of 6: 15676, step 6 of 6: 0, note: &quot;success&quot; } }
+2018-03-28T09:06:06.817+0800 I NETWORK  [thread2] connection accepted from 10.1.81.106:41502 #233778 (38 connections now open)
+2018-03-28T09:06:06.817+0800 I NETWORK  [conn233778] received client metadata from 10.1.81.106:41502 conn233778: { driver: { name: &quot;NetworkInterfaceASIO-ShardRegistry&quot;, version: &quot;3.4.10&quot; }, os: { type: &quot;Linux&quot;, name: &quot;Red Hat Enterprise Linux Server release 6.5 (Santiago)&quot;, architecture: &quot;x86_64&quot;, version: &quot;Kernel 2.6.32-431.el6.x86_64&quot; } }
+2018-03-28T09:06:06.818+0800 I COMMAND  [conn233778] CMD: drop mdgw.hq20171226
+</code></pre><p>mongodb在moveChunk的时候会使用 _distributed lock_来确保任意的shard上只有1个迁移作业。<br>在mongodb里，drop分片集合的操作也需要获取_distributed lock_。<br>因此由于chunk migration一直由于majority无法完成，_distributed lock_持续被占用无法释放，所以drop操作等待到超时报错。</p>
+<h2 id="解决-amp-建议"><a href="#解决-amp-建议" class="headerlink" title="解决&amp;建议"></a>解决&amp;建议</h2><ol>
+<li>在将down掉的从节点拉起后，chunk migration完成并释放锁后，drop成功</li>
+<li>在分片环境中，不要采用PSV的复制集架构，至少是1P2S的架构，保证chunk migration的正常进行。</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/10/MongoDB-Ops-Manager-Backup-Restore/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2268,148 +2450,13 @@ db.system.profile.aggregate([ {$group : { _id : {op : &quot;$op&quot;, ns : &quo
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/12/28/hello-world/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Dbits">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Dbits">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/12/28/hello-world/" itemprop="url">Hello World</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-28T11:07:16+08:00">
-                2017-12-28
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2017/12/28/hello-world/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/12/28/hello-world/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
+  <nav class="pagination">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+  </nav>
+
 
 
           </div>
@@ -2453,7 +2500,7 @@ db.system.profile.aggregate([ {$group : { _id : {op : &quot;$op&quot;, ns : &quo
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">10</span>
+                  <span class="site-state-item-count">11</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -2464,7 +2511,7 @@ db.system.profile.aggregate([ {$group : { _id : {op : &quot;$op&quot;, ns : &quo
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-count">2</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
