@@ -79,17 +79,17 @@
 
 
 
-<meta name="description" content="Ops Manager概念Monitoring 提供实时的报表、可视化、告警（数据库和系统性能） 轻量级的agent，不需要每台数据库服务器都安装  Automation 用户配置MongoDB node或者cluster automation agent每个数据库server上都要安装 automation agent管理monitor和backup agent  Backup 提供基于任务计划">
+<meta name="description" content="2dsphere 支持地理位置上包含、交叉、附近类型的查询 支持存储的数据为GeoJSON或者传统的经纬度（转化为GeoJSON的一个点） 支持sparse属性（文档没有对应的field，不会更新索引） 包含2dsphere field的索引，只有这个field会决定是否使用该索引 如果集合里包含多个2dsphere、2d索引，在$geoNear中指定key；如果不指定，默认先使用第一个2d索引，">
 <meta property="og:type" content="article">
-<meta property="og:title" content="MongoDB - Ops Manager Overview">
-<meta property="og:url" content="http://yoursite.com/2018/01/03/MongoDB-Ops-Manager-Overview/index.html">
+<meta property="og:title" content="MongoDB - 2dsphere&amp;2d index">
+<meta property="og:url" content="http://yoursite.com/2019/04/02/MongoDB-2dsphere-2d-index/index.html">
 <meta property="og:site_name" content="Dbits">
-<meta property="og:description" content="Ops Manager概念Monitoring 提供实时的报表、可视化、告警（数据库和系统性能） 轻量级的agent，不需要每台数据库服务器都安装  Automation 用户配置MongoDB node或者cluster automation agent每个数据库server上都要安装 automation agent管理monitor和backup agent  Backup 提供基于任务计划">
+<meta property="og:description" content="2dsphere 支持地理位置上包含、交叉、附近类型的查询 支持存储的数据为GeoJSON或者传统的经纬度（转化为GeoJSON的一个点） 支持sparse属性（文档没有对应的field，不会更新索引） 包含2dsphere field的索引，只有这个field会决定是否使用该索引 如果集合里包含多个2dsphere、2d索引，在$geoNear中指定key；如果不指定，默认先使用第一个2d索引，">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2018-01-03T06:30:36.118Z">
+<meta property="og:updated_time" content="2019-04-02T02:40:11.183Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="MongoDB - Ops Manager Overview">
-<meta name="twitter:description" content="Ops Manager概念Monitoring 提供实时的报表、可视化、告警（数据库和系统性能） 轻量级的agent，不需要每台数据库服务器都安装  Automation 用户配置MongoDB node或者cluster automation agent每个数据库server上都要安装 automation agent管理monitor和backup agent  Backup 提供基于任务计划">
+<meta name="twitter:title" content="MongoDB - 2dsphere&amp;2d index">
+<meta name="twitter:description" content="2dsphere 支持地理位置上包含、交叉、附近类型的查询 支持存储的数据为GeoJSON或者传统的经纬度（转化为GeoJSON的一个点） 支持sparse属性（文档没有对应的field，不会更新索引） 包含2dsphere field的索引，只有这个field会决定是否使用该索引 如果集合里包含多个2dsphere、2d索引，在$geoNear中指定key；如果不指定，默认先使用第一个2d索引，">
 
 
 
@@ -119,13 +119,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2018/01/03/MongoDB-Ops-Manager-Overview/"/>
+  <link rel="canonical" href="http://yoursite.com/2019/04/02/MongoDB-2dsphere-2d-index/"/>
 
 
 
 
 
-  <title>MongoDB - Ops Manager Overview | Dbits</title>
+  <title>MongoDB - 2dsphere&2d index | Dbits</title>
   
 
 
@@ -252,7 +252,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/03/MongoDB-Ops-Manager-Overview/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/04/02/MongoDB-2dsphere-2d-index/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Dbits">
@@ -269,7 +269,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">MongoDB - Ops Manager Overview</h1>
+          <h1 class="post-title" itemprop="name headline">MongoDB - 2dsphere&2d index</h1>
         
 
         <div class="post-meta">
@@ -281,8 +281,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-03T14:29:47+08:00">
-                2018-01-03
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-04-02T10:31:56+08:00">
+                2019-04-02
               </time>
             
 
@@ -322,9 +322,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/01/03/MongoDB-Ops-Manager-Overview/#comments" itemprop="discussionUrl">
+                <a href="/2019/04/02/MongoDB-2dsphere-2d-index/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2018/01/03/MongoDB-Ops-Manager-Overview/" itemprop="commentCount"></span>
+                        data-disqus-identifier="2019/04/02/MongoDB-2dsphere-2d-index/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -352,75 +352,22 @@
       
 
       
-        <h2 id="Ops-Manager概念"><a href="#Ops-Manager概念" class="headerlink" title="Ops Manager概念"></a>Ops Manager概念</h2><h3 id="Monitoring"><a href="#Monitoring" class="headerlink" title="Monitoring"></a>Monitoring</h3><ol>
-<li>提供实时的报表、可视化、告警（数据库和系统性能）</li>
-<li>轻量级的agent，不需要每台数据库服务器都安装</li>
+        <h2 id="2dsphere"><a href="#2dsphere" class="headerlink" title="2dsphere"></a>2dsphere</h2><ol>
+<li>支持地理位置上包含、交叉、附近类型的查询</li>
+<li>支持存储的数据为GeoJSON或者传统的经纬度（转化为GeoJSON的一个点）</li>
+<li>支持sparse属性（文档没有对应的field，不会更新索引）</li>
+<li>包含2dsphere field的索引，只有这个field会决定是否使用该索引</li>
+<li>如果集合里包含多个2dsphere、2d索引，在$geoNear中指定key；如果不指定，默认先使用第一个2d索引，没有再使用第一个2dsphere索引</li>
+<li>2dsphere的filed不能是片键</li>
+<li>2dsphere可以参照多个location和非location字段；2d索引只能参照1个location和1个非location字段</li>
 </ol>
-<h3 id="Automation"><a href="#Automation" class="headerlink" title="Automation"></a>Automation</h3><ol>
-<li>用户配置MongoDB node或者cluster</li>
-<li>automation agent每个数据库server上都要安装</li>
-<li>automation agent管理monitor和backup agent</li>
-</ol>
-<h3 id="Backup"><a href="#Backup" class="headerlink" title="Backup"></a>Backup</h3><ol>
-<li>提供基于任务计划的快照和任意时间点的恢复</li>
-<li>必须是集群的环境才可以备份，standalone实例需要先转换为replica set</li>
-</ol>
-<h4 id="Data-Backup"><a href="#Data-Backup" class="headerlink" title="Data Backup"></a>Data Backup</h4><ol>
-<li>backup agent会在复制集内创建一个新的invisble成员，做initial sync</li>
-<li>backup agent使用tail的方式复制oplog到一个head database（每个replica set对应一个head database）</li>
-<li>initial sync和tail oplog使用标准的MongoDB查询，生产库影响不大</li>
-<li>备份使用的mongod版本要大于等于备份客户端</li>
-</ol>
-<p><em>分片环境内，通过mongos停止balancer，插入marker token，然后才会开始执行快照</em></p>
-<table>
-<thead>
-<tr>
-<th>Snapshot Store</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>MongoDB blockstore</td>
-<td>Each successive snapshot stores only the differences from the previous snapshot. Compression and block-level de-duplication reduce the size of snapshot data.</td>
-</tr>
-<tr>
-<td>AWS S3 bucket</td>
-<td>Each successive snapshot stores only the differences from the previous snapshot. Compression and block-level de-duplication reduce the size of snapshot data.</td>
-</tr>
-<tr>
-<td>File system store</td>
-<td>Depending on the configuration, compression reduces the size of the snapshot data.</td>
-</tr>
-</tbody>
-</table>
-<h4 id="Data-Restoration"><a href="#Data-Restoration" class="headerlink" title="Data Restoration"></a>Data Restoration</h4><ul>
-<li>分片环境，可以恢复到2个snapshot之间的checkpoint点</li>
-<li>复制集，可以恢复到任意时间点</li>
-</ul>
-<h3 id="Server-Pool"><a href="#Server-Pool" class="headerlink" title="Server Pool"></a>Server Pool</h3><p>如果已经在服务器上部署了automation agent，可以通过osp上的管理员权限用户自动部署MongoDB数据库</p>
-<h2 id="Ops-Manager架构"><a href="#Ops-Manager架构" class="headerlink" title="Ops Manager架构"></a>Ops Manager架构</h2><ol>
-<li>host running ops manager</li>
-<li>host store application data （application database）</li>
-<li>host store snapshots</li>
-</ol>
-<h3 id="Ops-Manager-Application"><a href="#Ops-Manager-Application" class="headerlink" title="Ops Manager Application"></a>Ops Manager Application</h3><p>默认端口8080，可以多个application使用同一个配置和database</p>
-<h3 id="Backup-Daemon-Service"><a href="#Backup-Daemon-Service" class="headerlink" title="Backup Daemon Service"></a>Backup Daemon Service</h3><ol>
-<li>backup Daemon服务管理备份的快照和local copy</li>
-<li>local copy称为head database</li>
-<li>backup Daemon将head database存放在head directory目录下，将snapshot存放在snapshot store下</li>
-<li>backup Daemon所在的主机会创建一个invisible的成员</li>
-<li>多个Backup Daemon可以水平扩展存储并且提供手工failover</li>
-</ol>
-<h3 id="Dedicated-Storage-for-Operational-Data"><a href="#Dedicated-Storage-for-Operational-Data" class="headerlink" title="Dedicated Storage for Operational Data"></a>Dedicated Storage for Operational Data</h3><h4 id="Ops-Manager-Application-Database"><a href="#Ops-Manager-Application-Database" class="headerlink" title="Ops Manager Application Database"></a>Ops Manager Application Database</h4><ol>
-<li>建议使用复制集保存数据</li>
-<li>保存两类数据：监控数据 、 Metadata信息</li>
-</ol>
-<h4 id="Snapshot-Storage"><a href="#Snapshot-Storage" class="headerlink" title="Snapshot Storage"></a>Snapshot Storage</h4><ol>
-<li>local database</li>
-<li>local file systems</li>
-<li>cloud-based data store</li>
-</ol>
+<h2 id="创建2dsphere索引"><a href="#创建2dsphere索引" class="headerlink" title="创建2dsphere索引"></a>创建2dsphere索引</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">db.collection.createIndex( &#123; &lt;location field&gt; : &quot;2dsphere&quot; &#125; )</span><br></pre></td></tr></table></figure>
+<h2 id="带位置信息的复合索引，不需要loc字段前缀"><a href="#带位置信息的复合索引，不需要loc字段前缀" class="headerlink" title="带位置信息的复合索引，不需要loc字段前缀"></a>带位置信息的复合索引，不需要loc字段前缀</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">db.places.createIndex( &#123; loc : &quot;2dsphere&quot; , category : -1, name: 1 &#125; )</span><br></pre></td></tr></table></figure>
+<blockquote>
+<p>2dsphere复合索引不需要loc字段作为前缀，2d复合索引需要loc字段作为前缀</p>
+</blockquote>
+<h2 id="2dspehere的查询"><a href="#2dspehere的查询" class="headerlink" title="2dspehere的查询"></a>2dspehere的查询</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">## 多边形内的查询</span><br><span class="line">db.&lt;collection&gt;.find( &#123; &lt;location field&gt; :</span><br><span class="line">                         &#123; $geoWithin :</span><br><span class="line">                           &#123; $geometry :</span><br><span class="line">                             &#123; type : &quot;Polygon&quot; ,</span><br><span class="line">                               coordinates : [ &lt;coordinates&gt; ]</span><br><span class="line">                      &#125; &#125; &#125; &#125; )</span><br><span class="line"></span><br><span class="line">## 多边形交叉</span><br><span class="line">db.&lt;collection&gt;.find( &#123; &lt;location field&gt; :</span><br><span class="line">                         &#123; $geoIntersects :</span><br><span class="line">                           &#123; $geometry :</span><br><span class="line">                             &#123; type : &quot;&lt;GeoJSON object type&gt;&quot; ,</span><br><span class="line">                               coordinates : [ &lt;coordinates&gt; ]</span><br><span class="line">                      &#125; &#125; &#125; &#125; )</span><br><span class="line"></span><br><span class="line">## 临近查询</span><br><span class="line">db.&lt;collection&gt;.find( &#123; &lt;location field&gt; :</span><br><span class="line">                         &#123; $near :</span><br><span class="line">                           &#123; $geometry :</span><br><span class="line">                              &#123; type : &quot;Point&quot; ,</span><br><span class="line">                                coordinates : [ &lt;longitude&gt; , &lt;latitude&gt; ] &#125; ,</span><br><span class="line">                             $maxDistance : &lt;distance in meters&gt;</span><br><span class="line">                      &#125; &#125; &#125; )</span><br><span class="line"></span><br><span class="line">## 圆内的查询</span><br><span class="line">db.&lt;collection&gt;.find( &#123; &lt;location field&gt; :</span><br><span class="line">                         &#123; $geoWithin :</span><br><span class="line">                           &#123; $centerSphere :</span><br><span class="line">                              [ [ &lt;x&gt;, &lt;y&gt; ] , &lt;radius&gt; ] &#125;</span><br><span class="line">                      &#125; &#125; )</span><br></pre></td></tr></table></figure>
+<h2 id="2d索引"><a href="#2d索引" class="headerlink" title="2d索引"></a>2d索引</h2><h2 id="创建索引"><a href="#创建索引" class="headerlink" title="创建索引"></a>创建索引</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">db.&lt;collection&gt;.createIndex( &#123; &lt;location field&gt; : &quot;2d&quot; ,</span><br><span class="line">                               &lt;additional field&gt; : &lt;value&gt; &#125; ,</span><br><span class="line">                             &#123; &lt;index-specification options&gt; &#125; )</span><br><span class="line"></span><br><span class="line">## 查询</span><br><span class="line">db.&lt;collection&gt;.find( &#123; &lt;location field&gt; :</span><br><span class="line">                         &#123; $geoWithin :</span><br><span class="line">                            &#123; $box|$polygon|$center : &lt;coordinates&gt;</span><br><span class="line">                      &#125; &#125; &#125; )</span><br></pre></td></tr></table></figure>
 
       
     </div>
@@ -445,8 +392,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/01/03/MongoDB-3-4-Storage-Engine/" rel="next" title="MongoDB 3.4 - Storage Engine">
-                <i class="fa fa-chevron-left"></i> MongoDB 3.4 - Storage Engine
+              <a href="/2018/05/09/MongoDB分片数据库无法drop集合/" rel="next" title="MongoDB分片数据库无法drop集合">
+                <i class="fa fa-chevron-left"></i> MongoDB分片数据库无法drop集合
               </a>
             
           </div>
@@ -454,10 +401,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/01/10/MongoDB-Ops-Manager-Backup-Restore/" rel="prev" title="MongoDB - Ops Manager Backup & Restore">
-                MongoDB - Ops Manager Backup & Restore <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -592,7 +535,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Ops-Manager概念"><span class="nav-number">1.</span> <span class="nav-text">Ops Manager概念</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Monitoring"><span class="nav-number">1.1.</span> <span class="nav-text">Monitoring</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Automation"><span class="nav-number">1.2.</span> <span class="nav-text">Automation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Backup"><span class="nav-number">1.3.</span> <span class="nav-text">Backup</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Data-Backup"><span class="nav-number">1.3.1.</span> <span class="nav-text">Data Backup</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Data-Restoration"><span class="nav-number">1.3.2.</span> <span class="nav-text">Data Restoration</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Server-Pool"><span class="nav-number">1.4.</span> <span class="nav-text">Server Pool</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Ops-Manager架构"><span class="nav-number">2.</span> <span class="nav-text">Ops Manager架构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Ops-Manager-Application"><span class="nav-number">2.1.</span> <span class="nav-text">Ops Manager Application</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Backup-Daemon-Service"><span class="nav-number">2.2.</span> <span class="nav-text">Backup Daemon Service</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Dedicated-Storage-for-Operational-Data"><span class="nav-number">2.3.</span> <span class="nav-text">Dedicated Storage for Operational Data</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Ops-Manager-Application-Database"><span class="nav-number">2.3.1.</span> <span class="nav-text">Ops Manager Application Database</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Snapshot-Storage"><span class="nav-number">2.3.2.</span> <span class="nav-text">Snapshot Storage</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#2dsphere"><span class="nav-number">1.</span> <span class="nav-text">2dsphere</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建2dsphere索引"><span class="nav-number">2.</span> <span class="nav-text">创建2dsphere索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#带位置信息的复合索引，不需要loc字段前缀"><span class="nav-number">3.</span> <span class="nav-text">带位置信息的复合索引，不需要loc字段前缀</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2dspehere的查询"><span class="nav-number">4.</span> <span class="nav-text">2dspehere的查询</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2d索引"><span class="nav-number">5.</span> <span class="nav-text">2d索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建索引"><span class="nav-number">6.</span> <span class="nav-text">创建索引</span></a></li></ol></div>
             
 
           </div>
@@ -755,9 +698,9 @@
     
       <script type="text/javascript">
         var disqus_config = function () {
-          this.page.url = 'http://yoursite.com/2018/01/03/MongoDB-Ops-Manager-Overview/';
-          this.page.identifier = '2018/01/03/MongoDB-Ops-Manager-Overview/';
-          this.page.title = 'MongoDB - Ops Manager Overview';
+          this.page.url = 'http://yoursite.com/2019/04/02/MongoDB-2dsphere-2d-index/';
+          this.page.identifier = '2019/04/02/MongoDB-2dsphere-2d-index/';
+          this.page.title = 'MongoDB - 2dsphere&2d index';
         };
         var d = document, s = d.createElement('script');
         s.src = 'https://http-chnsin365-github-io.disqus.com/embed.js';
