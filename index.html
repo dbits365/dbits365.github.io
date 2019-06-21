@@ -249,6 +249,175 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/06/21/MongoDB-Compression/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Dbits">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Dbits">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/06/21/MongoDB-Compression/" itemprop="url">MongoDB-Compression</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-06-21T09:15:51+08:00">
+                2019-06-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/MongoDB/" itemprop="url" rel="index">
+                    <span itemprop="name">MongoDB</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/06/21/MongoDB-Compression/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2019/06/21/MongoDB-Compression/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="压缩-compression"><a href="#压缩-compression" class="headerlink" title="压缩 compression"></a>压缩 compression</h1><h2 id="3-0的压缩"><a href="#3-0的压缩" class="headerlink" title="3.0的压缩"></a>3.0的压缩</h2><ol>
+<li>随机数据压缩率不高</li>
+<li>二进制格式压缩率不高</li>
+<li>文本格式压缩效率高</li>
+<li>filed name压缩率高（或者通过降低filed name长度也可以优化）</li>
+</ol>
+<h2 id="prefix-index-compress"><a href="#prefix-index-compress" class="headerlink" title="prefix index compress"></a>prefix index compress</h2><ol>
+<li>如果索引是low cardinality ，比如国家、性别，如果在组合索引（compound indexe）的第一个字段是大量重复值（低选择性），MongoDB 3.0开始默认支持索引前缀压缩（Snappy 或者 zlib）</li>
+<li>集合的数据在磁盘上是压缩格式，读取到RAM中会解压缩。但是索引的prefix compression在RAM中还是压缩的格式，这样可以在RAM里缓存更多的索引。</li>
+</ol>
+<h2 id="启用压缩"><a href="#启用压缩" class="headerlink" title="启用压缩"></a>启用压缩</h2><ul>
+<li>MongoDB 3.0的 WireTiger默认开启了集合和索引的压缩</li>
+<li>显式开启复制集压缩，使用–wiredTigerCollectionBlockCompressor</li>
+<li>指定特定集合开启压缩<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">db.createCollection( &quot;email&quot;, &#123; storageEngine: &#123;</span><br><span class="line">                       wiredTiger: &#123; configString: &quot;blockCompressor=zlib&quot; &#125;&#125;&#125;)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="验证压缩效果"><a href="#验证压缩效果" class="headerlink" title="验证压缩效果"></a>验证压缩效果</h2><p>最简单的办法是开启和关闭压缩，分别加载数据，然后查看占用的大小<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt; db.stats(1024*1024).dataSize + db.stats(1024*1024).indexSize</span><br></pre></td></tr></table></figure></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/04/02/MongoDB-2dsphere-2d-index/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2030,235 +2199,6 @@ db.system.profile.aggregate([ {$group : { _id : {op : &quot;$op&quot;, ns : &quo
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/01/02/MongoDB-3-4-CRUD-and-Administrative-Commands/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Dbits">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Dbits">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/01/02/MongoDB-3-4-CRUD-and-Administrative-Commands/" itemprop="url">MongoDB 3.4 - CRUD and Administrative Commands</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-02T16:22:05+08:00">
-                2018-01-02
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/MongoDB/" itemprop="url" rel="index">
-                    <span itemprop="name">MongoDB</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/01/02/MongoDB-3-4-CRUD-and-Administrative-Commands/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2018/01/02/MongoDB-3-4-CRUD-and-Administrative-Commands/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="CRUD-amp-admin命令"><a href="#CRUD-amp-admin命令" class="headerlink" title="CRUD&amp;admin命令"></a>CRUD&amp;admin命令</h1><h2 id="Insertion"><a href="#Insertion" class="headerlink" title="Insertion"></a>Insertion</h2><ul>
-<li>key双引号用不用都可以</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">&gt; db.sample.insert(&#123;a:1&#125;)</span><br><span class="line">&gt; db.sample.insert(&#123;&quot;a&quot;:2&#125;)</span><br><span class="line">&gt; db.sample.find()</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;59b9e8abed80cf77d5636ae3&quot;), &quot;a&quot; : 1 &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;59b9e984ed80cf77d5636ae4&quot;), &quot;a&quot; : 2 &#125;</span><br><span class="line"></span><br><span class="line">&gt; var x = db.sample.find().toArray()</span><br><span class="line">&gt; x</span><br><span class="line">[</span><br><span class="line">    &#123;</span><br><span class="line">        &quot;_id&quot; : ObjectId(&quot;59b9e8abed80cf77d5636ae3&quot;),</span><br><span class="line">        &quot;a&quot; : 1</span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">        &quot;_id&quot; : ObjectId(&quot;59b9e984ed80cf77d5636ae4&quot;),</span><br><span class="line">        &quot;a&quot; : 2</span><br><span class="line">    &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
-<h2 id="Update"><a href="#Update" class="headerlink" title="Update"></a>Update</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">db.&lt;collection&gt;.update(&lt;where&gt; , &lt;doc_or_partial_update_expression&gt;,&lt;upsert&gt;,&lt;multi&gt;)</span><br></pre></td></tr></table></figure>
-<ol>
-<li>full update/replace</li>
-<li>partial update</li>
-<li><where>后面不使用任何operator，将会替换整个文档</where></li>
-<li>$set 修改对应的field， $inc 增加对应列的计数，如果原本不存在，则从1开始递增</li>
-<li>$unset 删掉一个field</li>
-<li>$rename 修改field的名字，逻辑上是做了$unset在$set,因此field在文档内的顺序可能会发生改变</li>
-<li>$setOneInsert 如果upsert插入了一条文档，则生效  { $setOnInsert: { <field1>: <value1>, … } }</value1></field1></li>
-<li>$mul 乘法运算 对象的field必须是数字类型的</li>
-<li>$min $max 对比field和特定的值，如果符合则修改</li>
-<li>Array操作：$set $push 增加 $pop 删除 $pushAll $pull $pullAll $addToSet </li>
-<li>$push $addToSet 还可以使用 $each $slice $sort $position</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line">&gt; db.array.insert(&#123; _id : 0 , a : [1, 2, 3, 4]&#125;)</span><br><span class="line">WriteResult(&#123; &quot;nInserted&quot; : 1 &#125;)</span><br><span class="line">&gt; db.array.find()</span><br><span class="line">&#123; &quot;_id&quot; : 0, &quot;a&quot; : [ 1, 2, 3, 4 ] &#125;</span><br><span class="line">&gt; db.array.update(&#123;_id : 0&#125;, &#123;$set : &#123;&quot;a.2&quot; : 5&#125;&#125;)</span><br><span class="line">WriteResult(&#123; &quot;nMatched&quot; : 1, &quot;nUpserted&quot; : 0, &quot;nModified&quot; : 1 &#125;)</span><br><span class="line">&gt; db.array.find()</span><br><span class="line">&#123; &quot;_id&quot; : 0, &quot;a&quot; : [ 1, 2, 5, 4 ] &#125;</span><br><span class="line">&gt; db.array.update(&#123;_id : 0&#125; , &#123;$push : &#123;a : 6&#125;&#125;)</span><br><span class="line">WriteResult(&#123; &quot;nMatched&quot; : 1, &quot;nUpserted&quot; : 0, &quot;nModified&quot; : 1 &#125;)</span><br><span class="line">&gt; db.array.find()</span><br><span class="line">&#123; &quot;_id&quot; : 0, &quot;a&quot; : [ 1, 2, 5, 4, 6 ] &#125;</span><br><span class="line"></span><br><span class="line">&gt; db.array.update(&#123;_id : 0&#125;, &#123;$pop : &#123;a : 1&#125;&#125;)</span><br><span class="line">WriteResult(&#123; &quot;nMatched&quot; : 1, &quot;nUpserted&quot; : 0, &quot;nModified&quot; : 1 &#125;)</span><br><span class="line">&gt; db.array.find()</span><br><span class="line">&#123; &quot;_id&quot; : 0, &quot;a&quot; : [ 1, 2, 5, 4 ] &#125;</span><br><span class="line">&gt; db.array.update(&#123;_id : 0&#125;, &#123;$pop : &#123;a : -1&#125;&#125;)</span><br><span class="line">WriteResult(&#123; &quot;nMatched&quot; : 1, &quot;nUpserted&quot; : 0, &quot;nModified&quot; : 1 &#125;)</span><br><span class="line">&gt; db.array.find()</span><br><span class="line">&#123; &quot;_id&quot; : 0, &quot;a&quot; : [ 2, 5, 4 ] &#125;</span><br><span class="line"></span><br><span class="line">&gt; db.array.update(&#123;_id : 0&#125;, &#123;$pushAll : &#123;a : [7, 8, 9]&#125;&#125;)</span><br><span class="line">WriteResult(&#123; &quot;nMatched&quot; : 1, &quot;nUpserted&quot; : 0, &quot;nModified&quot; : 1 &#125;)</span><br><span class="line">&gt; db.array.find()</span><br><span class="line">&#123; &quot;_id&quot; : 0, &quot;a&quot; : [ 2, 5, 4, 7, 8, 9 ] &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&gt; db.array.update(&#123;_id : 0&#125;, &#123;$pull : &#123;a : 7&#125;&#125;)</span><br><span class="line">WriteResult(&#123; &quot;nMatched&quot; : 1, &quot;nUpserted&quot; : 0, &quot;nModified&quot; : 1 &#125;)</span><br><span class="line">&gt; db.array.find()</span><br><span class="line">&#123; &quot;_id&quot; : 0, &quot;a&quot; : [ 2, 5, 4, 8, 9 ] &#125;</span><br><span class="line"></span><br><span class="line">&gt; db.array.update(&#123;_id : 0&#125;, &#123;$pullAll : &#123;a : [7, 8, 9]&#125;&#125;)</span><br><span class="line">WriteResult(&#123; &quot;nMatched&quot; : 1, &quot;nUpserted&quot; : 0, &quot;nModified&quot; : 1 &#125;)</span><br><span class="line">&gt; db.array.find()</span><br><span class="line">&#123; &quot;_id&quot; : 0, &quot;a&quot; : [ 2, 5, 4 ] &#125;</span><br><span class="line"></span><br><span class="line">&gt; db.array.update(&#123;_id : 0&#125;, &#123;$addToSet : &#123;a : 1&#125;&#125;)</span><br><span class="line">WriteResult(&#123; &quot;nMatched&quot; : 1, &quot;nUpserted&quot; : 0, &quot;nModified&quot; : 1 &#125;)</span><br><span class="line">&gt; db.array.find()</span><br><span class="line">&#123; &quot;_id&quot; : 0, &quot;a&quot; : [ 2, 5, 4, 1 ] &#125;</span><br><span class="line">&gt; db.array.update(&#123;_id : 0&#125;, &#123;$addToSet : &#123;a : 1&#125;&#125;)</span><br><span class="line">WriteResult(&#123; &quot;nMatched&quot; : 1, &quot;nUpserted&quot; : 0, &quot;nModified&quot; : 0 &#125;)</span><br><span class="line">&gt; db.array.find()</span><br><span class="line">&#123; &quot;_id&quot; : 0, &quot;a&quot; : [ 2, 5, 4, 1 ] &#125;</span><br></pre></td></tr></table></figure>
-<ul>
-<li>_id不能update，_id在document的生命周期内不能改变</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">&gt; var t = db.sample</span><br><span class="line">&gt; t.find()</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;59b9e8abed80cf77d5636ae3&quot;), &quot;a&quot; : 1 &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;59b9e984ed80cf77d5636ae4&quot;), &quot;a&quot; : 2 &#125;</span><br><span class="line"></span><br><span class="line">&gt; myobj = t.findOne()</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;59b9e8abed80cf77d5636ae3&quot;), &quot;a&quot; : 1 &#125;</span><br><span class="line">&gt; myobj.y = 123</span><br><span class="line">123</span><br><span class="line">&gt; myobj</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;59b9e8abed80cf77d5636ae3&quot;), &quot;a&quot; : 1, &quot;y&quot; : 123 &#125;</span><br><span class="line"></span><br><span class="line">&gt; t.update(&#123;_id:myobj._id&#125;,myobj)</span><br><span class="line">WriteResult(&#123; &quot;nMatched&quot; : 1, &quot;nUpserted&quot; : 0, &quot;nModified&quot; : 1 &#125;)</span><br><span class="line">&gt; t.find()</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;59b9e8abed80cf77d5636ae3&quot;), &quot;a&quot; : 1, &quot;y&quot; : 123 &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;59b9e984ed80cf77d5636ae4&quot;), &quot;a&quot; : 2 &#125;</span><br></pre></td></tr></table></figure>
-<h2 id="Save"><a href="#Save" class="headerlink" title="Save()"></a>Save()</h2><blockquote>
-<p>若新增的数据中存在主键 ，insert() 会提示错误，而save() 则更改原来的内容为新内容。</p>
-<p>如：<br>已存在数据：  {_id : 1, “ name “ : “ n1 “ }，再次进行插入操作时，<br>insert({_id : 1, “ name “ : “ n2 “ })    会报主键重复的错误提示<br>save({ _id : 1, “ name “ : “ n2 “ })     会把 n1 修改为  n2  。</p>
-<p>相同点：<br>若新增的数据中没有主键时，会增加一条记录。</p>
-<p>已存在数据：  { _id : 1, “ name “ : “ n1 “ }，再次进行插入操作时，<br>insert({ “ name “ : “ n2 “ })    插入的数据因为没有主键，所以会增加一条数据<br>save({  “ name “ : “ n2 “ })   增加一条数据。</p>
-</blockquote>
-<h2 id="partial-update-amp-document-limited"><a href="#partial-update-amp-document-limited" class="headerlink" title="partial update &amp; document limited"></a>partial update &amp; document limited</h2><ul>
-<li>每个文档（bson）大小限制16M</li>
-<li>$set $push $addToset $pop $unset</li>
-<li>db.collection.update({where},{obj},{upsert},{multi})   multi默认是false，只修改第一条match的document</li>
-<li>upsert  如果query没有符合的document则insert一条，并且会将query中的等于条件的field也一起插入</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">&gt; db.foo.find()</span><br><span class="line">&gt; db.foo.update(&#123;a : 5, b : 5&#125;, &#123; $set : &#123;c : 10&#125;&#125;, &#123;upsert : true&#125;)</span><br><span class="line">WriteResult(&#123;</span><br><span class="line">    &quot;nMatched&quot; : 0,</span><br><span class="line">    &quot;nUpserted&quot; : 1,</span><br><span class="line">    &quot;nModified&quot; : 0,</span><br><span class="line">    &quot;_id&quot; : ObjectId(&quot;5a014bab2e7289371f61d474&quot;)</span><br><span class="line">&#125;)</span><br><span class="line">&gt; db.foo.find()</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014bab2e7289371f61d474&quot;), &quot;a&quot; : 5, &quot;b&quot; : 5, &quot;c&quot; : 10 &#125;</span><br><span class="line"></span><br><span class="line">&gt; db.foo.update(&#123;a : 5, b : 6&#125;, &#123; $set : &#123;c : 8&#125;&#125;, &#123;upsert : true&#125;)</span><br><span class="line">WriteResult(&#123;</span><br><span class="line">    &quot;nMatched&quot; : 0,</span><br><span class="line">    &quot;nUpserted&quot; : 1,</span><br><span class="line">    &quot;nModified&quot; : 0,</span><br><span class="line">    &quot;_id&quot; : ObjectId(&quot;5a014bfb2e7289371f61d47a&quot;)</span><br><span class="line">&#125;)</span><br><span class="line">&gt; db.foo.find()</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014bab2e7289371f61d474&quot;), &quot;a&quot; : 5, &quot;b&quot; : 5, &quot;c&quot; : 10 &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014bfb2e7289371f61d47a&quot;), &quot;a&quot; : 5, &quot;b&quot; : 6, &quot;c&quot; : 8 &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&gt; db.foo.update(&#123;a : 5, b : &#123; $eq : 7&#125;&#125;, &#123; $set : &#123;c : 6&#125;&#125;, &#123;upsert : true&#125;)</span><br><span class="line">WriteResult(&#123;</span><br><span class="line">    &quot;nMatched&quot; : 0,</span><br><span class="line">    &quot;nUpserted&quot; : 1,</span><br><span class="line">    &quot;nModified&quot; : 0,</span><br><span class="line">    &quot;_id&quot; : ObjectId(&quot;5a014cc32e7289371f61d48b&quot;)</span><br><span class="line">&#125;)</span><br><span class="line">&gt; </span><br><span class="line">&gt; </span><br><span class="line">&gt; db.foo.find()</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014bab2e7289371f61d474&quot;), &quot;a&quot; : 5, &quot;b&quot; : 5, &quot;c&quot; : 10 &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014bfb2e7289371f61d47a&quot;), &quot;a&quot; : 5, &quot;b&quot; : 6, &quot;c&quot; : 8 &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014cc32e7289371f61d48b&quot;), &quot;a&quot; : 5, &quot;b&quot; : 7, &quot;c&quot; : 6 &#125;</span><br></pre></td></tr></table></figure>
-<h2 id="remove-document"><a href="#remove-document" class="headerlink" title="remove document"></a>remove document</h2><ul>
-<li>db.collection.remove(<where expr="">)</where></li>
-</ul>
-<p>支持正则：db.test.remove({ x : /ello/ })</p>
-<h2 id="the-basic-building-blocks-of-the-wire-protocol"><a href="#the-basic-building-blocks-of-the-wire-protocol" class="headerlink" title="the basic building blocks of the wire protocol"></a>the basic building blocks of the wire protocol</h2><ol>
-<li>getmore</li>
-<li>insert</li>
-<li>query</li>
-<li>remove</li>
-</ol>
-<h2 id="Bulk-write-operation"><a href="#Bulk-write-operation" class="headerlink" title="Bulk write operation"></a>Bulk write operation</h2><ul>
-<li>db.collection.bulkWrite()</li>
-<li>db.collection.insertMany()</li>
-</ul>
-<blockquote>
-<p>bulkwrite支持order和unorder两种方式，order在一个失败操作后退出，unorder遇到失败后不会退出，直到全部执行完，性能上unorder要好，特别是在shared collection的环境内</p>
-</blockquote>
-<ul>
-<li>initializeOrderedBulkOp()/initializeUnorderedBulkOp() version 3.2</li>
-</ul>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">var bulk = db.users.initializeOrderedBulkOp();</span><br><span class="line">bulk.insert( &#123; user: &quot;abc123&quot;, status: &quot;A&quot;, points: 0 &#125; );</span><br><span class="line">bulk.insert( &#123; user: &quot;ijk123&quot;, status: &quot;A&quot;, points: 0 &#125; );</span><br><span class="line">bulk.insert( &#123; user: &quot;mop123&quot;, status: &quot;P&quot;, points: 0 &#125; );</span><br><span class="line">bulk.find( &#123; status: &quot;D&quot; &#125; ).remove();</span><br><span class="line">bulk.find( &#123; status: &quot;P&quot; &#125; ).update( &#123; $set: &#123; comment: &quot;Pending&quot; &#125; &#125; );</span><br><span class="line">bulk.execute();</span><br></pre></td></tr></table></figure>
-<h2 id="db-runCommand"><a href="#db-runCommand" class="headerlink" title="db.runCommand()"></a>db.runCommand()</h2><blockquote>
-<p>db.runCommand(command)</p>
-<p>This is the preferred method to issue database commands, as it provides a consistent interface between the shell and drivers.</p>
-<p>[command][1]</p>
-</blockquote>
-<h2 id="help"><a href="#help" class="headerlink" title="help"></a>help</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">&gt; help</span><br><span class="line">    db.help()                    help on db methods</span><br><span class="line">    db.mycoll.help()             help on collection methods</span><br><span class="line">    sh.help()                    sharding helpers</span><br><span class="line">    rs.help()                    replica set helpers</span><br><span class="line">    help admin                   administrative help</span><br><span class="line">    help connect                 connecting to a db help</span><br><span class="line">    help keys                    key shortcuts</span><br><span class="line">    help misc                    misc things to know</span><br><span class="line">    help mr                      mapreduce</span><br><span class="line"></span><br><span class="line">    show dbs                     show database names</span><br><span class="line">    show collections             show collections in current database</span><br><span class="line">    show users                   show users in current database</span><br><span class="line">    show profile                 show most recent system.profile entries with time &gt;= 1ms</span><br><span class="line">    show logs                    show the accessible logger names</span><br><span class="line">    show log [name]              prints out the last segment of log in memory, &apos;global&apos; is default</span><br><span class="line">    use &lt;db_name&gt;                set current database</span><br><span class="line">    db.foo.find()                list objects in collection foo</span><br><span class="line">    db.foo.find( &#123; a : 1 &#125; )     list objects in foo where a == 1</span><br><span class="line">    it                           result of the last line evaluated; use to further iterate</span><br><span class="line">    DBQuery.shellBatchSize = x   set default number of items to display on shell</span><br><span class="line">    exit                         quit the mongo shell</span><br></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">db.isMaster()</span><br><span class="line">&#123;</span><br><span class="line">    &quot;ismaster&quot; : true,</span><br><span class="line">    &quot;maxBsonObjectSize&quot; : 16777216,</span><br><span class="line">    &quot;maxMessageSizeBytes&quot; : 48000000,</span><br><span class="line">    &quot;maxWriteBatchSize&quot; : 1000,</span><br><span class="line">    &quot;localTime&quot; : ISODate(&quot;2017-09-19T01:11:48.180Z&quot;),</span><br><span class="line">    &quot;maxWireVersion&quot; : 5,</span><br><span class="line">    &quot;minWireVersion&quot; : 0,</span><br><span class="line">    &quot;readOnly&quot; : false,</span><br><span class="line">    &quot;ok&quot; : 1</span><br><span class="line">&#125;</span><br><span class="line">db.runCommand(&#123;isMaster:1&#125;)</span><br><span class="line">&#123;</span><br><span class="line">    &quot;ismaster&quot; : true,</span><br><span class="line">    &quot;maxBsonObjectSize&quot; : 16777216,</span><br><span class="line">    &quot;maxMessageSizeBytes&quot; : 48000000,</span><br><span class="line">    &quot;maxWriteBatchSize&quot; : 1000,</span><br><span class="line">    &quot;localTime&quot; : ISODate(&quot;2017-09-19T01:12:02.021Z&quot;),</span><br><span class="line">    &quot;maxWireVersion&quot; : 5,</span><br><span class="line">    &quot;minWireVersion&quot; : 0,</span><br><span class="line">    &quot;readOnly&quot; : false,</span><br><span class="line">    &quot;ok&quot; : 1</span><br><span class="line">&#125;</span><br><span class="line">db.runCommand(&quot;isMaster&quot;)</span><br><span class="line">&#123;</span><br><span class="line">    &quot;ismaster&quot; : true,</span><br><span class="line">    &quot;maxBsonObjectSize&quot; : 16777216,</span><br><span class="line">    &quot;maxMessageSizeBytes&quot; : 48000000,</span><br><span class="line">    &quot;maxWriteBatchSize&quot; : 1000,</span><br><span class="line">    &quot;localTime&quot; : ISODate(&quot;2017-09-19T01:12:33.016Z&quot;),</span><br><span class="line">    &quot;maxWireVersion&quot; : 5,</span><br><span class="line">    &quot;minWireVersion&quot; : 0,</span><br><span class="line">    &quot;readOnly&quot; : false,</span><br><span class="line">    &quot;ok&quot; : 1</span><br></pre></td></tr></table></figure>
-<h2 id="demo-for-insert"><a href="#demo-for-insert" class="headerlink" title="demo for insert"></a>demo for insert</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">while(1) &#123;db.test3.insert(&#123;ts : new Date()&#125;)&#125;;</span><br></pre></td></tr></table></figure>
-<h2 id="find"><a href="#find" class="headerlink" title="find"></a>find</h2><p>find（）会返回游标cursor</p>
-<p>db.collection.find(query, projection)</p>
-<h4 id="对于字符类型，可以使用inequalities"><a href="#对于字符类型，可以使用inequalities" class="headerlink" title="对于字符类型，可以使用inequalities"></a>对于字符类型，可以使用inequalities</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&gt; db.foo.find()</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f4a5a0d4aef4446894e&quot;), &quot;name&quot; : &quot;Alex&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f575a0d4aef4446894f&quot;), &quot;name&quot; : &quot;Bob&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f5c5a0d4aef44468950&quot;), &quot;name&quot; : &quot;Clark&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f625a0d4aef44468951&quot;), &quot;name&quot; : &quot;Dick&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f6a5a0d4aef44468952&quot;), &quot;name&quot; : &quot;Eric&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f6f5a0d4aef44468953&quot;), &quot;name&quot; : &quot;Frank&quot; &#125;</span><br><span class="line">&gt; db.foo.find(&#123;name : &#123;$lt : &apos;B&apos;&#125;&#125;)</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f4a5a0d4aef4446894e&quot;), &quot;name&quot; : &quot;Alex&quot; &#125;</span><br><span class="line">&gt; db.foo.find(&#123;name : &#123;$lt : &apos;D&apos;, $gt : &apos;A&apos;&#125;&#125;)</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f4a5a0d4aef4446894e&quot;), &quot;name&quot; : &quot;Alex&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f575a0d4aef4446894f&quot;), &quot;name&quot; : &quot;Bob&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f5c5a0d4aef44468950&quot;), &quot;name&quot; : &quot;Clark&quot; &#125;</span><br><span class="line">&gt; db.foo.find(&#123;name : &#123;$lt : &apos;b&apos;&#125;&#125;)</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f4a5a0d4aef4446894e&quot;), &quot;name&quot; : &quot;Alex&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f575a0d4aef4446894f&quot;), &quot;name&quot; : &quot;Bob&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f5c5a0d4aef44468950&quot;), &quot;name&quot; : &quot;Clark&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f625a0d4aef44468951&quot;), &quot;name&quot; : &quot;Dick&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f6a5a0d4aef44468952&quot;), &quot;name&quot; : &quot;Eric&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f6f5a0d4aef44468953&quot;), &quot;name&quot; : &quot;Frank&quot; &#125;</span><br></pre></td></tr></table></figure>
-<h4 id="exists-type-regex"><a href="#exists-type-regex" class="headerlink" title="$exists $type $regex"></a>$exists $type $regex</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">&gt; db.foo.find()</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f4a5a0d4aef4446894e&quot;), &quot;name&quot; : &quot;Alex&quot;, &quot;profession&quot; : &quot;Engineer&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f575a0d4aef4446894f&quot;), &quot;name&quot; : &quot;Bob&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f5c5a0d4aef44468950&quot;), &quot;name&quot; : &quot;Clark&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f625a0d4aef44468951&quot;), &quot;name&quot; : &quot;Dick&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f6a5a0d4aef44468952&quot;), &quot;name&quot; : &quot;Eric&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f6f5a0d4aef44468953&quot;), &quot;name&quot; : &quot;Frank&quot; &#125;</span><br><span class="line">&gt; db.foo.find(&#123;profession : &#123; $exists : true&#125;&#125;)</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f4a5a0d4aef4446894e&quot;), &quot;name&quot; : &quot;Alex&quot;, &quot;profession&quot; : &quot;Engineer&quot; &#125;</span><br><span class="line"></span><br><span class="line">&gt; db.foo.find(&#123;name : &#123; $type : 2&#125;&#125;)</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f4a5a0d4aef4446894e&quot;), &quot;name&quot; : &quot;Alex&quot;, &quot;profession&quot; : &quot;Engineer&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f575a0d4aef4446894f&quot;), &quot;name&quot; : &quot;Bob&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f5c5a0d4aef44468950&quot;), &quot;name&quot; : &quot;Clark&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f625a0d4aef44468951&quot;), &quot;name&quot; : &quot;Dick&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f6a5a0d4aef44468952&quot;), &quot;name&quot; : &quot;Eric&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f6f5a0d4aef44468953&quot;), &quot;name&quot; : &quot;Frank&quot; &#125;</span><br><span class="line">&gt; db.foo.find(&#123;name : &#123; $type : 1&#125;&#125;)</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a0152815a0d4aef44468954&quot;), &quot;name&quot; : 2 &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">&gt; db.foo.find(&#123;name : &#123; $regex : &apos;a&apos;&#125;&#125;)</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f5c5a0d4aef44468950&quot;), &quot;name&quot; : &quot;Clark&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f6f5a0d4aef44468953&quot;), &quot;name&quot; : &quot;Frank&quot; &#125;</span><br></pre></td></tr></table></figure>
-<p>文档嵌套，查询的时候需要按照原来的顺序</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">&gt; db.foo.find()</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f4a5a0d4aef4446894e&quot;), &quot;name&quot; : &quot;Alex&quot;, &quot;profession&quot; : &quot;Engineer&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f575a0d4aef4446894f&quot;), &quot;name&quot; : &quot;Bob&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f5c5a0d4aef44468950&quot;), &quot;name&quot; : &quot;Clark&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f625a0d4aef44468951&quot;), &quot;name&quot; : &quot;Dick&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f6a5a0d4aef44468952&quot;), &quot;name&quot; : &quot;Eric&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a014f6f5a0d4aef44468953&quot;), &quot;name&quot; : &quot;Frank&quot; &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a0152815a0d4aef44468954&quot;), &quot;name&quot; : 2 &#125;</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a0157385a0d4aef44468955&quot;), &quot;name&quot; : &quot;richard&quot;, &quot;email&quot; : &#123; &quot;work&quot; : &quot;richard@work.com&quot;, &quot;personal&quot; : &quot;richard@person.com&quot; &#125; &#125;</span><br><span class="line">&gt; db.foo.find(&#123; &quot;email&quot; : &#123; &quot;work&quot; : &quot;richard@work.com&quot;, &quot;personal&quot; : &quot;richard@person.com&quot; &#125;&#125;)</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a0157385a0d4aef44468955&quot;), &quot;name&quot; : &quot;richard&quot;, &quot;email&quot; : &#123; &quot;work&quot; : &quot;richard@work.com&quot;, &quot;personal&quot; : &quot;richard@person.com&quot; &#125; &#125;</span><br><span class="line">&gt; db.foo.find(&#123; &quot;email&quot; : &#123; &quot;personal&quot; : &quot;richard@person.com&quot; , &quot;work&quot; : &quot;richard@work.com&quot; &#125;&#125;)</span><br><span class="line">&gt; </span><br><span class="line">&gt; db.foo.find(&#123; &quot;email.work&quot; : &quot;richard@work.com&quot;&#125; )</span><br><span class="line">&#123; &quot;_id&quot; : ObjectId(&quot;5a0157385a0d4aef44468955&quot;), &quot;name&quot; : &quot;richard&quot;, &quot;email&quot; : &#123; &quot;work&quot; : &quot;richard@work.com&quot;, &quot;personal&quot; : &quot;richard@person.com&quot; &#125; &#125;</span><br></pre></td></tr></table></figure>
-<h3 id="findAndModify"><a href="#findAndModify" class="headerlink" title="findAndModify"></a>findAndModify</h3><ol>
-<li>修改并返回一条文档，可以使用sort等对符合条件的文档排序后再修改</li>
-<li>默认返回的是修改前的文档，使用new： true返回修改后的文档</li>
-<li>update（）可以修改多条（multi ： true），但是不能决定修改符合条件的多个文档中的哪一个文档</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">db.collection.findAndModify(&#123;</span><br><span class="line">    query: &lt;document&gt;,</span><br><span class="line">    sort: &lt;document&gt;,</span><br><span class="line">    remove: &lt;boolean&gt;,</span><br><span class="line">    update: &lt;document&gt;,</span><br><span class="line">    new: &lt;boolean&gt;,</span><br><span class="line">    fields: &lt;document&gt;,</span><br><span class="line">    upsert: &lt;boolean&gt;,</span><br><span class="line">    bypassDocumentValidation: &lt;boolean&gt;,</span><br><span class="line">    writeConcern: &lt;document&gt;,</span><br><span class="line">    collation: &lt;document&gt;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2309,7 +2249,7 @@ db.system.profile.aggregate([ {$group : { _id : {op : &quot;$op&quot;, ns : &quo
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-count">13</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
